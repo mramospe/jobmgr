@@ -56,6 +56,9 @@ setup(
     # Find all the packages in this directory
     packages = find_packages(),
 
+    # Install scripts
+    scripts = ['scripts/{}'.format(f) for f in os.listdir('scripts')],
+
     # Requisites
     install_requires = ['pytest'],
 

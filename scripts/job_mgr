@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+'''
+Script to initialize an IPython session with all the classes and functions from
+"stepped_job" being loaded.
+'''
+
+# IPython
+try:
+    import IPython
+except:
+    raise RuntimeError('IPython is not available')
+
+from traitlets.config.loader import Config
+
+# Local
+import stepped_job
+
+# Initialize the job manager
+jobs = stepped_job.JobManager()
+
+# Start IPython session
+cfg = Config()
+cfg.TerminalInteractiveShell.banner1 = '''
+Welcome to "stepped_job" version {}
+Access the job manager via "jobs"
+
+Documentation is available at:
+https://mramospe.github.io/stepped_job/
+
+For issues, questions and contributions, please visit:
+https://github.com/mramospe/stepped_job
+'''.format(stepped_job.version.__version__)
+
+avars = {'jobs': jobs}
+for n in stepped_job.__all__:
+    avars[n] = getattr(stepped_job, n)
+
+IPython.start_ipython(config=cfg, user_ns=avars)
+
+# Prevent from creating zombie jobs, waiting for completion if they
+# are running, or killing them if the user causes a KeyboardInterrupt
+# exception to be raised.
+if any(map(lambda j: j.status() == StatusCode.running, jobs.values())):
+
+    logging.info('Running jobs detected; waiting for completion')
+
+    try:
+        for j in jobs.values():
+            j.wait()
+    except KeyboardInterrupt:
+        for j in jobs.values():
+            logging.warning('Killing running jobs')
+            j.kill()
