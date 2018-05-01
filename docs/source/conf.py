@@ -147,6 +147,11 @@ html_sidebars = {
 }
 
 
+# -- Options for auto-documentation ---------------------------------------
+
+autoclass_content = 'init'
+
+
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.

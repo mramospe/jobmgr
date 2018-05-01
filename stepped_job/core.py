@@ -22,7 +22,7 @@ from . import utils
 __all__ = ['Job', 'JobManager', 'manager', 'StatusCode', 'Step']
 
 
-class StatusCode:
+class StatusCode(object):
     '''
     Hold the different possible status of jobs and steps.
     '''
@@ -39,21 +39,25 @@ class StatusCode:
     ''' The job/step has failed or has been killed. '''
 
 
-class Job:
-    '''
-    Represent an object to handle a job.
-    '''
+class Job(object):
+
     def __init__( self, path = None ):
         '''
-        Build the job, creating a new directory under "path" with a job ID. This
-        job ID is expected to be a number, and the next to the greatest in the
+        Instance to handle different steps, linked together. This object
+        creates a new directory under "path" with a job ID. This job ID
+        is expected to be a number, and the next to the greatest in the
         directory will be associated to the job (0 if none is found).
 
         :param path: path to the desired directory.
         :type path: str
+
+        :ivar steps: Steps managed by this job.
+        :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
         self._odir = utils.create_dir(path)
         self._kill_event = threading.Event()
+
+        self.jid = None
 
         mgr = JobManager()
         if mgr.keys():
@@ -217,14 +221,13 @@ class Job:
 
 
 class JobManager(dict):
-    '''
-    Singleton to hold and manage jobs.
-    '''
+
     __instance = None
 
     def __init__( self ):
         '''
-        Build the class as any other python dictionary.
+        Singleton to hold and manage jobs. If an attempt is made to create
+        another object of this kind, the same reference will be returned.
         '''
         super(JobManager, self).__init__(self)
 
@@ -263,7 +266,8 @@ class JobManager(dict):
 
 def manager():
     '''
-    Return the JobManager instance.
+    Return the JobManager instance. This is equivalent to attempt to build \
+    a new instance of :class:`JobManager`.
 
     :returns: the instance to manage jobs.
     :rtype: JobManager
@@ -271,13 +275,13 @@ def manager():
     return JobManager()
 
 
-class Step:
-    '''
-    Represent a step on a generation process.
-    '''
+class Step(object):
+
     def __init__( self, name, executable, opts, odir, kill_event, data_regex = None, data_builder = None, prev_step = None ):
         '''
-        :param name: name of the step.
+        Represent a step on a generation process.
+
+        :param name: name of the step. It must be unique within a job.
         :type name: str
         :param executable: application/version to run.
         :type executable: str
@@ -285,24 +289,29 @@ class Step:
         :type opts: list(str)
         :param odir: where to create the output directory.
         :type odir: str
-        :param kill_event: event associated to a possible "kill" signal, to
+        :param kill_event: event associated to a possible "kill" signal, to \
         be propagated among all the steps.
         :type kill_event: threading.Event
-        :param data_regex: regex representing the output data to send to the next step.
+        :param data_regex: regex representing the output data to send to the \
+        next step.
         :type data_regex: str
-
         :param data_builder: function to define the way how the data is passed \
         to the executable. It must take a list of strings (paths to the data \
         files), and return a merged string. The default behaviour is to \
         return list to be executed as: \
         <executable> file1 file2 ... \
         but one can also define the string so the argument is explicitely \
-        specified, like:
+        specified, like: \
         <executable> --files file1 file2 ...
         :type data_builder: function
-
         :param prev_step: possible previous step.
         :type prev_step: Step
+
+        :ivar command: Command to be executed. Input data is added when the \
+        process just before execution (once it is defined).
+        :ivar name: Name of the step.
+        :ivar data_builder: Function that modifies the input data to parse it \
+        to the executable.
         '''
         self.name = name
 
@@ -315,8 +324,7 @@ class Step:
             self._prev_queue = None
 
         # Build the command to execute
-        self.cmd = [executable] + opts
-        logging.info('applying command' +  ' '.join(self.cmd))
+        self.command = [executable] + opts
 
         # This is the queue associated to this step
         self._queue = queue.Queue()
@@ -330,6 +338,8 @@ class Step:
         # Set the command to define how the data is parsed to the executable
         if data_builder is None:
             self.data_builder = lambda d, *args, **kwargs: ' '.join(d)
+        else:
+            self.data_builder = data_builder
 
         # Store the associated "kill" event
         self._kill_event = kill_event
@@ -416,7 +426,7 @@ class Step:
             os.makedirs(self._opath)
 
             # Initialize the process
-            proc = subprocess.Popen(self.cmd + extra_opts,
+            proc = subprocess.Popen(self.command + extra_opts,
                                     cwd=self._opath,
                                     stdout=open(os.path.join(self._opath, 'stdout'), 'wt'),
                                     stderr=open(os.path.join(self._opath, 'stderr'), 'wt')
