@@ -1,0 +1,6 @@
+<map id="inheritance70f0eed46e" name="inheritance70f0eed46e">
+<area shape="rect" id="node1" title="Represent an object to handle a job." alt="" coords="18,153,90,179"/>
+<area shape="rect" id="node2" title="Singleton to hold and manage jobs." alt="" coords="5,104,103,129"/>
+<area shape="rect" id="node3" title="Represent a step on a generation process." alt="" coords="18,55,90,80"/>
+<area shape="rect" id="node4" title="Hold the different possible status of jobs and steps." alt="" coords="18,5,90,31"/>
+</map>

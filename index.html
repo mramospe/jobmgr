@@ -1,0 +1,182 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Introduction &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="manager" href="api/stepped_job.manager.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>This package is aimed to provide a simple and friendly interface to launch jobs
+with many steps in each of them. The steps are assumed to be related, so the
+output data from the first is used in the second, successively.</p>
+</div>
+<div class="section" id="installation">
+<h1>Installation:<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>To use this package, clone the repository and install with <cite>pip</cite>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone https://github.com/mramospe/stepped_job.git
+pip install stepped_job
+</pre></div>
+</div>
+</div>
+<div class="section" id="functions-and-classes">
+<h1>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h1>
+<p>Here you can find the documentation on the functions and classes
+of the stepped_job package. The class inheritance diagram is also shown.</p>
+<span class="target" id="module-stepped_job"></span><div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.manager.html#stepped_job.manager" title="stepped_job.manager"><code class="xref py py-obj docutils literal"><span class="pre">manager</span></code></a>()</td>
+<td>Return the JobManager instance.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.Job.html#stepped_job.Job" title="stepped_job.Job"><code class="xref py py-obj docutils literal"><span class="pre">Job</span></code></a>([path])</td>
+<td>Represent an object to handle a job.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/stepped_job.JobManager.html#stepped_job.JobManager" title="stepped_job.JobManager"><code class="xref py py-obj docutils literal"><span class="pre">JobManager</span></code></a>()</td>
+<td>Singleton to hold and manage jobs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.status.html#stepped_job.status" title="stepped_job.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a></td>
+<td>Hold the different possible status of jobs and steps.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/stepped_job.Step.html#stepped_job.Step" title="stepped_job.Step"><code class="xref py py-obj docutils literal"><span class="pre">Step</span></code></a>(name,&nbsp;executable,&nbsp;opts,&nbsp;odir,&nbsp;kill_event)</td>
+<td>Represent a step on a generation process.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="class-inheritance-diagram">
+<h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
+<img src="_images/inheritance-8f86329dfb1337bee850d4fdc659291a63613112.png" alt="Inheritance diagram of stepped_job.core.Job, stepped_job.core.JobManager, stepped_job.core.status, stepped_job.core.Step" usemap="#inheritance70f0eed46e" class="inheritance"/>
+<map id="inheritance70f0eed46e" name="inheritance70f0eed46e">
+<area shape="rect" id="node1" title="Represent an object to handle a job." alt="" coords="18,153,90,179"/>
+<area shape="rect" id="node2" title="Singleton to hold and manage jobs." alt="" coords="5,104,103,129"/>
+<area shape="rect" id="node3" title="Represent a step on a generation process." alt="" coords="18,55,90,80"/>
+<area shape="rect" id="node4" title="Hold the different possible status of jobs and steps." alt="" coords="18,5,90,31"/>
+</map>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">stepped_job</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.manager.html">manager</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.status.html">status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Step.html">Step</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="api/stepped_job.manager.html" title="next chapter">manager</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

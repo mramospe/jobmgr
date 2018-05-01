@@ -1,0 +1,25 @@
+Step
+====
+
+.. currentmodule:: stepped_job
+
+.. autoclass:: Step
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Step.clear_input_data
+      ~Step.peek
+      ~Step.start
+      ~Step.status
+      ~Step.wait
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: clear_input_data
+   .. automethod:: peek
+   .. automethod:: start
+   .. automethod:: status
+   .. automethod:: wait

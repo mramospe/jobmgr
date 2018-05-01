@@ -1,0 +1,203 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Step &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="status" href="stepped_job.status.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="step">
+<h1>Step<a class="headerlink" href="#step" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="stepped_job.Step">
+<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">Step</code><span class="sig-paren">(</span><em>name</em>, <em>executable</em>, <em>opts</em>, <em>odir</em>, <em>kill_event</em>, <em>data_regex=None</em>, <em>data_builder=None</em>, <em>prev_step=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represent a step on a generation process.</p>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Step.clear_input_data" title="stepped_job.Step.clear_input_data"><code class="xref py py-obj docutils literal"><span class="pre">clear_input_data</span></code></a>()</td>
+<td>Remove the input data from this step.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#stepped_job.Step.peek" title="stepped_job.Step.peek"><code class="xref py py-obj docutils literal"><span class="pre">peek</span></code></a>([name,&nbsp;editor])</td>
+<td>Open the “stdout” or “stderr” file in terminal mode.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Step.start" title="stepped_job.Step.start"><code class="xref py py-obj docutils literal"><span class="pre">start</span></code></a>()</td>
+<td>Create the associated task and start the step.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#stepped_job.Step.status" title="stepped_job.Step.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a>()</td>
+<td>Returh the status of this step.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Step.wait" title="stepped_job.Step.wait"><code class="xref py py-obj docutils literal"><span class="pre">wait</span></code></a>()</td>
+<td>Wait till the task is done.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="stepped_job.Step.clear_input_data">
+<code class="descname">clear_input_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step.clear_input_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.clear_input_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the input data from this step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.Step.peek">
+<code class="descname">peek</code><span class="sig-paren">(</span><em>name='stdout'</em>, <em>editor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.peek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the “stdout” or “stderr” file in terminal mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – log-file to open (“stdout” or “stderr”). The default is         “stdout”.</li>
+<li><strong>editor</strong> – editor to open. If None is provided, then it will         try to use “emacs” or “vi” to open the file. A RuntimeError is         raised if none of them exist in the system, or a ValueError if         the provided editor is not accesible.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.6)"><strong>ValueError</strong></a> – if name is not “stdout” or “stderr”, or if         the provided editor is not accesible.</li>
+<li><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.6)"><strong>RuntimeError</strong></a> – if “editor = None” and neither “emacs”         nor “vi” are accesible.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.Step.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the associated task and start the step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.Step.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returh the status of this step. This is the correct way of
+accessing the status of the step, since it updates it on
+request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">status of this step</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.Step.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Step.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait till the task is done.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">stepped_job</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.status.html">status</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="stepped_job.status.html" title="previous chapter">status</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/api/stepped_job.Step.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

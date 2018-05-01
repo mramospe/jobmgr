@@ -1,0 +1,25 @@
+Job
+===
+
+.. currentmodule:: stepped_job
+
+.. autoclass:: Job
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Job.add_step
+      ~Job.kill
+      ~Job.start
+      ~Job.status
+      ~Job.wait
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: add_step
+   .. automethod:: kill
+   .. automethod:: start
+   .. automethod:: status
+   .. automethod:: wait

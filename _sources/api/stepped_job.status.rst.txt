@@ -1,0 +1,23 @@
+status
+======
+
+.. currentmodule:: stepped_job
+
+.. autoclass:: status
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~status.killed
+      ~status.new
+      ~status.running
+      ~status.terminated
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: killed
+   .. autoattribute:: new
+   .. autoattribute:: running
+   .. autoattribute:: terminated

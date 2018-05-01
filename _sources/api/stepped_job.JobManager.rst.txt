@@ -1,0 +1,7 @@
+JobManager
+==========
+
+.. currentmodule:: stepped_job
+
+.. autoclass:: JobManager
+   :show-inheritance:

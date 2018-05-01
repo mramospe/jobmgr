@@ -1,0 +1,6 @@
+manager
+=======
+
+.. currentmodule:: stepped_job
+
+.. autofunction:: manager
