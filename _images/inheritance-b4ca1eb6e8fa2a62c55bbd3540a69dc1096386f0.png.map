@@ -1,0 +1,6 @@
+<map id="inheritancee493a58439" name="inheritancee493a58439">
+<area shape="rect" id="node1" href="api/stepped_job.Job.html#stepped_job.Job" target="_top" title="Represent an object to handle a job." alt="" coords="18,153,90,179"/>
+<area shape="rect" id="node2" href="api/stepped_job.JobManager.html#stepped_job.JobManager" target="_top" title="Singleton to hold and manage jobs." alt="" coords="5,104,103,129"/>
+<area shape="rect" id="node3" href="api/stepped_job.StatusCode.html#stepped_job.StatusCode" target="_top" title="Hold the different possible status of jobs and steps." alt="" coords="5,55,103,80"/>
+<area shape="rect" id="node4" href="api/stepped_job.Step.html#stepped_job.Step" target="_top" title="Represent a step on a generation process." alt="" coords="18,5,90,31"/>
+</map>

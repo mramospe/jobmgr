@@ -61,34 +61,45 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Job&#39;</span><span class="p">,</span> <span class="s1">&#39;JobManager&#39;</span><span class="p">,</span> <span class="s1">&#39;manager&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;Step&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Job&#39;</span><span class="p">,</span> <span class="s1">&#39;JobManager&#39;</span><span class="p">,</span> <span class="s1">&#39;manager&#39;</span><span class="p">,</span> <span class="s1">&#39;StatusCode&#39;</span><span class="p">,</span> <span class="s1">&#39;Step&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="status"><a class="viewcode-back" href="../../api/stepped_job.status.html#stepped_job.status">[docs]</a><span class="k">class</span> <span class="nc">status</span><span class="p">:</span>
+<div class="viewcode-block" id="StatusCode"><a class="viewcode-back" href="../../api/stepped_job.StatusCode.html#stepped_job.StatusCode">[docs]</a><span class="k">class</span> <span class="nc">StatusCode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Hold the different possible status of jobs and steps.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">new</span>        <span class="o">=</span> <span class="s1">&#39;new&#39;</span>
-    <span class="n">running</span>    <span class="o">=</span> <span class="s1">&#39;running&#39;</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="s1">&#39;new&#39;</span>
+    <span class="sd">&#39;&#39;&#39; The instance has just been created. &#39;&#39;&#39;</span>
+
+    <span class="n">running</span> <span class="o">=</span> <span class="s1">&#39;running&#39;</span>
+    <span class="sd">&#39;&#39;&#39; The instance is running. &#39;&#39;&#39;</span>
+
     <span class="n">terminated</span> <span class="o">=</span> <span class="s1">&#39;terminated&#39;</span>
-    <span class="n">killed</span>     <span class="o">=</span> <span class="s1">&#39;killed&#39;</span></div>
+    <span class="sd">&#39;&#39;&#39; The execution has ended. &#39;&#39;&#39;</span>
+
+    <span class="n">killed</span> <span class="o">=</span> <span class="s1">&#39;killed&#39;</span>
+    <span class="sd">&#39;&#39;&#39; The job/step has failed or has been killed. &#39;&#39;&#39;</span></div>
 
 
-<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../api/stepped_job.Job.html#stepped_job.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">:</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Represent an object to handle a job.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../api/stepped_job.Job.html#stepped_job.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build the job, creating a new directory under &quot;path&quot; with a job ID. This</span>
-<span class="sd">        job ID is expected to be a number, and the next to the greatest in the</span>
+<span class="sd">        Instance to handle different steps, linked together. This object</span>
+<span class="sd">        creates a new directory under &quot;path&quot; with a job ID. This job ID</span>
+<span class="sd">        is expected to be a number, and the next to the greatest in the</span>
 <span class="sd">        directory will be associated to the job (0 if none is found).</span>
 
 <span class="sd">        :param path: path to the desired directory.</span>
 <span class="sd">        :type path: str</span>
+
+<span class="sd">        :ivar steps: Steps managed by this job.</span>
+<span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_odir</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">create_dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">jid</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">mgr</span> <span class="o">=</span> <span class="n">JobManager</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mgr</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -98,7 +109,7 @@
 
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Create new job with ID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">new</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">steps</span>   <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Register the object</span>
@@ -178,11 +189,11 @@
 <span class="sd">        :param first: step ID to start processing.</span>
 <span class="sd">        :type first: int or str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">status</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Restarting unfinished job </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">running</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Job </span><span class="si">{}</span><span class="s1"> with steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">,</span>
                                                     <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">]))</span>
@@ -220,19 +231,19 @@
 <span class="sd">        :returns: status of the job.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">killed</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span><span class="p">):</span>
 
-            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">status</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
 
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Job terminated&#39;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">terminated</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span>
 
-            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">status</span><span class="o">.</span><span class="n">killed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
+            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
 
                 <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Job </span><span class="si">{}</span><span class="s1"> has been killed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">))</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">killed</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
 
@@ -252,14 +263,13 @@
 
 
 <div class="viewcode-block" id="JobManager"><a class="viewcode-back" href="../../api/stepped_job.JobManager.html#stepped_job.JobManager">[docs]</a><span class="k">class</span> <span class="nc">JobManager</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Singleton to hold and manage jobs.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+
     <span class="n">__instance</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build the class as any other python dictionary.</span>
+<span class="sd">        Singleton to hold and manage jobs. If an attempt is made to create</span>
+<span class="sd">        another object of this kind, the same reference will be returned.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">JobManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -298,7 +308,8 @@
 
 <div class="viewcode-block" id="manager"><a class="viewcode-back" href="../../api/stepped_job.manager.html#stepped_job.manager">[docs]</a><span class="k">def</span> <span class="nf">manager</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Return the JobManager instance.</span>
+<span class="sd">    Return the JobManager instance. This is equivalent to attempt to build \</span>
+<span class="sd">    a new instance of :class:`JobManager`.</span>
 
 <span class="sd">    :returns: the instance to manage jobs.</span>
 <span class="sd">    :rtype: JobManager</span>
@@ -306,13 +317,13 @@
     <span class="k">return</span> <span class="n">JobManager</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Step"><a class="viewcode-back" href="../../api/stepped_job.Step.html#stepped_job.Step">[docs]</a><span class="k">class</span> <span class="nc">Step</span><span class="p">:</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Represent a step on a generation process.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Step"><a class="viewcode-back" href="../../api/stepped_job.Step.html#stepped_job.Step">[docs]</a><span class="k">class</span> <span class="nc">Step</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">executable</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">odir</span><span class="p">,</span> <span class="n">kill_event</span><span class="p">,</span> <span class="n">data_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data_builder</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">prev_step</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        :param name: name of the step.</span>
+<span class="sd">        Represent a step on a generation process.</span>
+
+<span class="sd">        :param name: name of the step. It must be unique within a job.</span>
 <span class="sd">        :type name: str</span>
 <span class="sd">        :param executable: application/version to run.</span>
 <span class="sd">        :type executable: str</span>
@@ -320,28 +331,33 @@
 <span class="sd">        :type opts: list(str)</span>
 <span class="sd">        :param odir: where to create the output directory.</span>
 <span class="sd">        :type odir: str</span>
-<span class="sd">        :param kill_event: event associated to a possible &quot;kill&quot; signal, to</span>
+<span class="sd">        :param kill_event: event associated to a possible &quot;kill&quot; signal, to \</span>
 <span class="sd">        be propagated among all the steps.</span>
 <span class="sd">        :type kill_event: threading.Event</span>
-<span class="sd">        :param data_regex: regex representing the output data to send to the next step.</span>
+<span class="sd">        :param data_regex: regex representing the output data to send to the \</span>
+<span class="sd">        next step.</span>
 <span class="sd">        :type data_regex: str</span>
-
 <span class="sd">        :param data_builder: function to define the way how the data is passed \</span>
 <span class="sd">        to the executable. It must take a list of strings (paths to the data \</span>
 <span class="sd">        files), and return a merged string. The default behaviour is to \</span>
 <span class="sd">        return list to be executed as: \</span>
 <span class="sd">        &lt;executable&gt; file1 file2 ... \</span>
 <span class="sd">        but one can also define the string so the argument is explicitely \</span>
-<span class="sd">        specified, like:</span>
+<span class="sd">        specified, like: \</span>
 <span class="sd">        &lt;executable&gt; --files file1 file2 ...</span>
 <span class="sd">        :type data_builder: function</span>
-
 <span class="sd">        :param prev_step: possible previous step.</span>
 <span class="sd">        :type prev_step: Step</span>
+
+<span class="sd">        :ivar command: Command to be executed. Input data is added when the \</span>
+<span class="sd">        process just before execution (once it is defined).</span>
+<span class="sd">        :ivar name: Name of the step.</span>
+<span class="sd">        :ivar data_builder: Function that modifies the input data to parse it \</span>
+<span class="sd">        to the executable.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">new</span>
 
         <span class="c1"># Set the previous step queue</span>
         <span class="k">if</span> <span class="n">prev_step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -350,8 +366,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Build the command to execute</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">opts</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;applying command&#39;</span> <span class="o">+</span>  <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">opts</span>
 
         <span class="c1"># This is the queue associated to this step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
@@ -365,6 +380,8 @@
         <span class="c1"># Set the command to define how the data is parsed to the executable</span>
         <span class="k">if</span> <span class="n">data_builder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_builder</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_builder</span> <span class="o">=</span> <span class="n">data_builder</span>
 
         <span class="c1"># Store the associated &quot;kill&quot; event</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span> <span class="o">=</span> <span class="n">kill_event</span>
@@ -451,7 +468,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_opath</span><span class="p">)</span>
 
             <span class="c1"># Initialize the process</span>
-            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd</span> <span class="o">+</span> <span class="n">extra_opts</span><span class="p">,</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">+</span> <span class="n">extra_opts</span><span class="p">,</span>
                                     <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_opath</span><span class="p">,</span>
                                     <span class="n">stdout</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_opath</span><span class="p">,</span> <span class="s1">&#39;stdout&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">),</span>
                                     <span class="n">stderr</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_opath</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span>
@@ -555,7 +572,7 @@
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create the associated task and start the step.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">running</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
@@ -579,12 +596,12 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">terminated</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">killed</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
 
@@ -616,7 +633,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/stepped_job.Job.html">Job</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/stepped_job.status.html">status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/stepped_job.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/stepped_job.Step.html">Step</a></li>
 </ul>
 

@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="status" href="stepped_job.status.html" />
+    <link rel="next" title="StatusCode" href="stepped_job.StatusCode.html" />
     <link rel="prev" title="Job" href="stepped_job.Job.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -47,7 +47,8 @@
 <dt id="stepped_job.JobManager">
 <em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">JobManager</code><a class="reference internal" href="../_modules/stepped_job/core.html#JobManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.JobManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a></p>
-<p>Singleton to hold and manage jobs.</p>
+<p>Singleton to hold and manage jobs. If an attempt is made to create
+another object of this kind, the same reference will be returned.</p>
 </dd></dl>
 
 </div>
@@ -74,7 +75,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.status.html">status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.Step.html">Step</a></li>
 </ul>
 
@@ -83,7 +84,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="stepped_job.Job.html" title="previous chapter">Job</a></li>
-      <li>Next: <a href="stepped_job.status.html" title="next chapter">status</a></li>
+      <li>Next: <a href="stepped_job.StatusCode.html" title="next chapter">StatusCode</a></li>
   </ul></li>
 </ul>
 </div>

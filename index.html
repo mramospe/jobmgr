@@ -81,12 +81,12 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.Job.html#stepped_job.Job" title="stepped_job.Job"><code class="xref py py-obj docutils literal"><span class="pre">Job</span></code></a>([path])</td>
-<td>Represent an object to handle a job.</td>
+<td>Instance to handle different steps, linked together.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/stepped_job.JobManager.html#stepped_job.JobManager" title="stepped_job.JobManager"><code class="xref py py-obj docutils literal"><span class="pre">JobManager</span></code></a>()</td>
 <td>Singleton to hold and manage jobs.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.status.html#stepped_job.status" title="stepped_job.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.StatusCode.html#stepped_job.StatusCode" title="stepped_job.StatusCode"><code class="xref py py-obj docutils literal"><span class="pre">StatusCode</span></code></a></td>
 <td>Hold the different possible status of jobs and steps.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/stepped_job.Step.html#stepped_job.Step" title="stepped_job.Step"><code class="xref py py-obj docutils literal"><span class="pre">Step</span></code></a>(name,&nbsp;executable,&nbsp;opts,&nbsp;odir,&nbsp;kill_event)</td>
@@ -97,12 +97,9 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-8f86329dfb1337bee850d4fdc659291a63613112.png" alt="Inheritance diagram of stepped_job.core.Job, stepped_job.core.JobManager, stepped_job.core.status, stepped_job.core.Step" usemap="#inheritance70f0eed46e" class="inheritance"/>
-<map id="inheritance70f0eed46e" name="inheritance70f0eed46e">
-<area shape="rect" id="node1" title="Represent an object to handle a job." alt="" coords="18,153,90,179"/>
-<area shape="rect" id="node2" title="Singleton to hold and manage jobs." alt="" coords="5,104,103,129"/>
-<area shape="rect" id="node3" title="Represent a step on a generation process." alt="" coords="18,55,90,80"/>
-<area shape="rect" id="node4" title="Hold the different possible status of jobs and steps." alt="" coords="18,5,90,31"/>
+<img src="_images/inheritance-96c4b5013a208062536b74da7368e54a0054dd07.png" alt="Inheritance diagram of stepped_job.core.Job, stepped_job.core.JobManager, stepped_job.core.StatusCode, stepped_job.core.Step" usemap="#inheritancee493a58439" class="inheritance"/>
+<map id="inheritancee493a58439" name="inheritancee493a58439">
+<area shape="rect" id="node3" title="Hold the different possible status of jobs and steps." alt="" coords="5,55,103,80"/>
 </map>
 </div>
 </div>
@@ -137,7 +134,7 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Job.html">Job</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.status.html">status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Step.html">Step</a></li>
 </ul>
 

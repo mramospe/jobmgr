@@ -1,0 +1,6 @@
+__version__
+===========
+
+.. currentmodule:: stepped_job
+
+.. autodata:: __version__

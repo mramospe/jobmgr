@@ -47,7 +47,25 @@
 <dt id="stepped_job.Job">
 <em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Represent an object to handle a job.</p>
+<p>Instance to handle different steps, linked together. This object
+creates a new directory under “path” with a job ID. This job ID
+is expected to be a number, and the next to the greatest in the
+directory will be associated to the job (0 if none is found).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to the desired directory.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>steps</strong> – Steps managed by this job.</li>
+<li><strong>jid</strong> – Job ID, determined by the subdirectories in the output path.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods Summary</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -167,7 +185,7 @@ request</p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Job</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.status.html">status</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.Step.html">Step</a></li>
 </ul>
 
