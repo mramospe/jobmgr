@@ -63,7 +63,7 @@ def test_job():
 
     job.wait()
 
-    assert job.status() == stepped_job.core.status.terminated
+    assert job.status() == stepped_job.core.StatusCode.terminated
 
     # If one step fails, it should kill the rest
     job = stepped_job.Job('test_job')
@@ -85,10 +85,10 @@ def test_job():
     for s in job.steps:
         print(s.status())
 
-    assert all(map(lambda s: s.status() == stepped_job.core.status.killed,
+    assert all(map(lambda s: s.status() == stepped_job.core.StatusCode.killed,
                    job.steps))
 
-    assert job.status() == stepped_job.core.status.killed
+    assert job.status() == stepped_job.core.StatusCode.killed
 
     # Test killing a job
     job = stepped_job.Job('test_job')
@@ -113,4 +113,4 @@ def test_job():
 
     job.kill()
 
-    assert job.status() == stepped_job.core.status.killed
+    assert job.status() == stepped_job.core.StatusCode.killed

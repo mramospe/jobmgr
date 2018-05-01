@@ -19,17 +19,24 @@ except:
 from . import utils
 
 
-__all__ = ['Job', 'JobManager', 'manager', 'status', 'Step']
+__all__ = ['Job', 'JobManager', 'manager', 'StatusCode', 'Step']
 
 
-class status:
+class StatusCode:
     '''
     Hold the different possible status of jobs and steps.
     '''
-    new        = 'new'
-    running    = 'running'
+    new = 'new'
+    ''' The instance has just been created. '''
+
+    running = 'running'
+    ''' The instance is running. '''
+
     terminated = 'terminated'
-    killed     = 'killed'
+    ''' The execution has ended. '''
+
+    killed = 'killed'
+    ''' The job/step has failed or has been killed. '''
 
 
 class Job:
@@ -56,7 +63,7 @@ class Job:
 
         logging.info('Create new job with ID: {}'.format(self.jid))
 
-        self._status = status.new
+        self._status = StatusCode.new
         self.steps   = []
 
         # Register the object
@@ -136,11 +143,11 @@ class Job:
         :param first: step ID to start processing.
         :type first: int or str
         '''
-        if self.status() == status.running:
+        if self.status() == StatusCode.running:
             logging.warning('Restarting unfinished job {}'.format(self.jid))
             self.kill()
 
-        self._status = status.running
+        self._status = StatusCode.running
 
         logging.info('Job {} with steps: {}'.format(self.jid,
                                                     [s.name for s in self.steps]))
@@ -178,19 +185,19 @@ class Job:
         :returns: status of the job.
         :rtype: str
         '''
-        if self._status not in (status.terminated, status.killed):
+        if self._status not in (StatusCode.terminated, StatusCode.killed):
 
-            if all(map(lambda t: t.status() == status.terminated, self.steps)):
+            if all(map(lambda t: t.status() == StatusCode.terminated, self.steps)):
 
                 logging.info('Job terminated')
 
-                self._status = status.terminated
+                self._status = StatusCode.terminated
 
-            elif any(map(lambda t: t.status() == status.killed, self.steps)):
+            elif any(map(lambda t: t.status() == StatusCode.killed, self.steps)):
 
                 logging.warning('Job {} has been killed'.format(self.jid))
 
-                self._status = status.killed
+                self._status = StatusCode.killed
 
         return self._status
 
@@ -299,7 +306,7 @@ class Step:
         '''
         self.name = name
 
-        self._status = status.new
+        self._status = StatusCode.new
 
         # Set the previous step queue
         if prev_step is not None:
@@ -513,7 +520,7 @@ class Step:
         '''
         Create the associated task and start the step.
         '''
-        self._status = status.running
+        self._status = StatusCode.running
 
         self._terminated_event.clear()
 
@@ -537,12 +544,12 @@ class Step:
         '''
         if self._terminated_event.is_set():
 
-            self._status = status.terminated
+            self._status = StatusCode.terminated
 
         elif self._task is not None:
             if not self._task.is_alive():
                 if self._kill_event.is_set():
-                    self._status = status.killed
+                    self._status = StatusCode.killed
 
         return self._status
 
