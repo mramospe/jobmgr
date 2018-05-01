@@ -96,7 +96,8 @@ class Job:
         :type executable: str
         :param odir: where to create the output directory.
         :type odir: str
-        :param data_regex: regex representing the output data to send to the next step.
+        :param data_regex: regex representing the output data to send to the \
+        next step.
         :type data_regex: str
         :param data_builder: function to define the way how the data is passed \
         to the executable. It must take a list of strings (paths to the data \
@@ -104,7 +105,7 @@ class Job:
         return list to be executed as: \
         <executable> file1 file2 ... \
         but one can also define the string so the argument is explicitely \
-        specified, like:
+        specified, like: \
         <executable> --files file1 file2 ...
         :type data_builder: function
         :raises RuntimeError: if the name used for this step is already \
