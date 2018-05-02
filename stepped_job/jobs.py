@@ -6,6 +6,7 @@ __author__  = ['Miguel Ramos Pernas']
 __email__   = ['miguel.ramos.pernas@cern.ch']
 
 # Python
+import inspect
 import logging
 import os
 import re
@@ -29,6 +30,11 @@ __all__ = ['JobBase', 'Job', 'Step', 'SteppedJob']
 
 
 class JobBase(object):
+
+    __str_attrs__ = {
+        'status'      : 'status',
+        'output path' : '_odir'
+    }
 
     def __init__( self, path, kill_event = None, register = True ):
         '''
@@ -70,6 +76,12 @@ class JobBase(object):
         if register:
             mgr[self.jid] = self
 
+    def __del__( self ):
+        '''
+        Delete the job, killing all its tasks.
+        '''
+        self.kill()
+
     def __repr__( self ):
         '''
         Representation as a string.
@@ -78,6 +90,27 @@ class JobBase(object):
         :rtype: str
         '''
         return self.__str__()
+
+    def __str__( self ):
+        '''
+        Representation as a string.
+
+        :returns: this class as a string.
+        :rtype: str
+        '''
+        maxl = max(map(len, self.__str_attrs__.keys()))
+
+        out = []
+        for k, v in sorted(self.__str_attrs__.items()):
+
+            attr = getattr(self, v)
+
+            if inspect.ismethod(attr):
+                attr = attr()
+
+            out.append(' {:<{}} = {}'.format(k, maxl, attr))
+
+        return '\n'.join([' {}: ('.format(self.full_name())] + out + [' )'])
 
     def full_name( self ):
         '''
@@ -97,9 +130,9 @@ class JobBase(object):
 
     def status( self ):
         '''
-        Return the status of this job. This is the correct way of
-        accessing the status of the job, since it updates it on
-        request.
+        Return the status of this job.
+        This is the correct way of accessing the status of the job, since it
+        updates it on request.
         This method is not implemented in this class.
 
         :returns: status of this job.
@@ -108,8 +141,17 @@ class JobBase(object):
         '''
         raise NotImplementedError('Attempt to call abstract base class method')
 
+    def wait( self ):
+        '''
+        Wait till the task is done.
+        This method is not implemented in this class.
+        '''
+        raise NotImplementedError('Attempt to call abstract base class method')
+
 
 class Job(JobBase):
+
+    __str_attrs__ = utils.merge_dicts(JobBase.__str_attrs__, {'command': 'command'})
 
     def __init__( self, executable, opts, odir, kill_event = None, register = True ):
         '''
@@ -141,23 +183,6 @@ class Job(JobBase):
 
         # To hold the task
         self._task = None
-
-    def __str__( self ):
-        '''
-        Representation as a string.
-
-        :returns: this class as a string.
-        :rtype: str
-        '''
-        attrs = (self.full_name(), self.status(), self._odir)#, self._data_regex.pattern
-
-        return '\n'.join([
-                ' {}: (',
-                '  status       = {}',
-                '  output path  = {}',
-#                '  output regex = {}',
-                '  )'
-                ]).format(*attrs)
 
     def _create_thread( self ):
         '''
@@ -311,10 +336,13 @@ class Job(JobBase):
         '''
         Wait till the task is done.
         '''
-        self._task.join()
+        if self._task is not None:
+            self._task.join()
 
 
 class Step(Job):
+
+    __str_attrs__ = utils.merge_dicts(Job.__str_attrs__, {'data regex': '_data_regex'})
 
     def __init__( self, name, executable, opts, odir, kill_event, data_regex = None, data_builder = None, prev_step = None ):
         '''
@@ -382,8 +410,7 @@ class Step(Job):
         '''
         Kill the task and wait for completion.
         '''
-        self._kill_event.set()
-        self._task.join()
+        self.kill()
 
         while not self._queue.empty():
             self._queue.get()

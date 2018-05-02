@@ -35,3 +35,20 @@ def create_dir( path = None ):
     os.mkdir(cdir)
 
     return cdir
+
+
+def merge_dicts( *dicts ):
+    '''
+    Merge the given dictionaries into one, using the :method:`dict.update`
+    method.
+
+    :param dicts: dictionaries to merge.
+    :type dicts: tuple
+    :returns: merged dictionary.
+    :rtype: dict
+    '''
+    out = {}
+    for d in dicts:
+        out.update(d)
+
+    return out
