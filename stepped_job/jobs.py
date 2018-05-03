@@ -68,12 +68,6 @@ class JobBase(object):
 
         self.jid = registry.register(self)
 
-    def __del__( self ):
-        '''
-        Delete the job, killing all its tasks.
-        '''
-        self.kill()
-
     def __repr__( self ):
         '''
         Representation as a string.
@@ -131,16 +125,14 @@ class JobBase(object):
 
         :returns: status of this job.
         :rtype: int
-        :raises NotImplementedError: since it is an abstract method.
         '''
-        raise NotImplementedError('Attempt to call abstract base class method')
+        return self._status
 
     def wait( self ):
         '''
-        Wait till the task is done.
-        This method is not implemented in this class.
+        Wait till the job is done.
         '''
-        raise NotImplementedError('Attempt to call abstract base class method')
+        pass
 
 
 class Job(JobBase):
@@ -398,15 +390,6 @@ class Step(Job):
 
         self.data_regex = data_regex
 
-    def __del__( self ):
-        '''
-        Kill the task and wait for completion.
-        '''
-        self.kill()
-
-        while not self._queue.empty():
-            self._queue.get()
-
     def _create_thread( self ):
         '''
         Create a new thread for this job.
@@ -524,12 +507,6 @@ class SteppedJob(JobBase):
         super(SteppedJob, self).__init__(path, registry=registry)
 
         self.steps = JobRegistry()
-
-    def __del__( self ):
-        '''
-        Kill the process when deleting the job.
-        '''
-        self.kill()
 
     def __str__( self ):
         '''

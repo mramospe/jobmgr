@@ -6,9 +6,49 @@ __author__  = ['Miguel Ramos Pernas']
 __email__   = ['miguel.ramos.pernas@cern.ch']
 
 # Python
+import atexit
 import logging
+import threading
+
+# For python2 and python3 compatibility
+try:
+    import Queue as queue
+except:
+    import queue
 
 __all__ = ['JobManager', 'JobRegistry', 'manager', 'StatusCode']
+
+
+class Singleton(object):
+
+    __instance    = None
+    __initialized = False
+
+    def __init__( self, derived ):
+        '''
+        Base class to represent a singleton.
+        If an attempt is made to create another object of this kind, the
+        same reference will be returned.
+        '''
+        if derived.__initialized:
+            return
+
+        super(Singleton, self).__init__()
+
+        derived.__initialized = True
+
+    def __new__( cls ):
+        '''
+        Return the stored instance if it exists.
+
+        :returns: generated or already existing instance.
+        :rtype: cls
+        '''
+        if cls.__initialized is False:
+
+            cls.__instance = super(Singleton, cls).__new__(cls)
+
+        return cls.__instance
 
 
 class JobRegistry(list):
@@ -16,8 +56,22 @@ class JobRegistry(list):
     def __init__( self ):
         '''
         Represent a registry of jobs.
+        This object does not own the jobs, in the sense that it will not bring
+        kill signals on deletion.
         '''
         super(JobRegistry, self).__init__()
+
+    def __del__( self ):
+        '''
+        Safely kill the jobs and wait for completion.
+        '''
+        # Kill the non-terminated jobs
+        for j in filter(lambda j: j.status() != StatusCode.terminated, self):
+            j.kill()
+
+        # Wait till the jobs finish their processes
+        for j in self:
+            j.wait()
 
     def __repr__( self ):
         '''
@@ -56,36 +110,13 @@ class JobRegistry(list):
         return jid
 
 
-class JobManager(JobRegistry):
-
-    __instance    = None
-    __initialized = False
+class JobManager(Singleton, JobRegistry):
 
     def __init__( self ):
         '''
-        Singleton to hold and manage jobs. If an attempt is made to create
-        another object of this kind, the same reference will be returned.
+        Singleton to hold and manage jobs.
         '''
-        if JobManager.__initialized:
-            return
-
-        super(JobManager, self).__init__()
-
-        JobManager.__initialized = True
-
-    def __new__( cls ):
-        '''
-        This class is a singleton, so a check is done to see whether an
-        instance of it exists before building it.
-
-        :returns: instance of the class.
-        :rtype: JobManager
-        '''
-        if JobManager.__instance is None:
-
-            JobManager.__instance = super(JobManager, cls).__new__(cls)
-
-        return JobManager.__instance
+        super(JobManager, self).__init__(self.__class__)
 
     def __del__( self ):
         '''
@@ -102,9 +133,9 @@ class JobManager(JobRegistry):
                 for j in self:
                     j.wait()
             except KeyboardInterrupt:
-                for j in self:
-                    logging.getLogger(__name__).warning('Killing running jobs')
-                    j.kill()
+                logging.getLogger(__name__).warning('Killing running jobs')
+
+        super(JobManager, self).__del__()
 
 
 def manager():

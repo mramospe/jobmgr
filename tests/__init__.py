@@ -3,6 +3,7 @@ Auxiliar functions to run the tests.
 '''
 
 import atexit
+import pytest
 import shutil
 
 
