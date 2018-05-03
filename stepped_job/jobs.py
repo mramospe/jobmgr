@@ -102,11 +102,13 @@ class JobBase(object):
 
             out.append(' {:<{}} = {}'.format(k, maxl, attr))
 
-        return '\n'.join([' {}: ('.format(self.full_name())] + out + [' )'])
+        return '\n'.join([' {}: ('.format(self.full_jid())] + out + [' )'])
 
-    def full_name( self ):
+    def full_jid( self ):
         '''
-        Return the full name of this step.
+        Return the full job ID for this job.
+        In this class it is just the index on the :class:`JobRegistry` object
+        who owns it.
 
         :returns: full name of this step.
         :rtype: str
@@ -491,9 +493,11 @@ class Step(Job):
             if not self._prev_queue.empty():
                 self._prev_queue.get()
 
-    def full_name( self ):
+    def full_jid( self ):
         '''
-        Return the full name of this step.
+        Return the full job ID for this step.
+        This is the addition of the index on the :class:`JobRegistry` object
+        who owns it and its name.
 
         :returns: full name of this step.
         :rtype: str
