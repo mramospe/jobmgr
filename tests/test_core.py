@@ -16,6 +16,10 @@ def test_job_manager():
     # Test singleton behaviour
     assert stepped_job.JobManager() is stepped_job.JobManager()
 
+    # Very important to test that the JobManager imported from the top
+    # module and that from "core" are the same.
+    assert stepped_job.JobManager() is  stepped_job.core.JobManager()
+
 
 def test_manager():
     '''

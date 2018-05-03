@@ -23,7 +23,7 @@ except:
 
 # Local
 from . import utils
-from .core import JobManager, StatusCode
+from .core import JobManager, JobRegistry, StatusCode
 
 
 __all__ = ['JobBase', 'Job', 'Step', 'SteppedJob']
@@ -36,30 +36,20 @@ class JobBase(object):
         'output path' : '_odir'
     }
 
-    def __init__( self, path, kill_event = None, register = True ):
+    def __init__( self, path, kill_event = None, registry = None ):
         '''
         Base class to create a directory for a job, holding also an ID and a
         status code.
 
         :param path: path to the desired directory.
         :type path: str
-        :param register: whether to register this instance in the job manager.
-        :type register: bool
+        :param registry: instance to register the object. If "None", the \
+        object will be registered in the main :class:`JobManager` instance.
+        :type registry: JobRegistry or None
 
         :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
         self._odir = utils.create_dir(path)
-
-        self.jid = None
-
-        mgr = JobManager()
-        if mgr.keys():
-            self.jid = max(map(lambda s: int(s), mgr.keys())) + 1
-        else:
-            self.jid = 0
-
-        logging.getLogger(__name__).info(
-            'Create new job with ID: {}'.format(self.jid))
 
         self._status = StatusCode.new
 
@@ -73,8 +63,10 @@ class JobBase(object):
         self._terminated_event = threading.Event()
 
         # Register the object
-        if register:
-            mgr[self.jid] = self
+        if registry is None:
+            registry = JobManager()
+
+        self.jid = registry.register(self)
 
     def __del__( self ):
         '''
@@ -153,7 +145,7 @@ class Job(JobBase):
 
     __str_attrs__ = utils.merge_dicts(JobBase.__str_attrs__, {'command': 'command'})
 
-    def __init__( self, executable, opts, odir, kill_event = None, register = True ):
+    def __init__( self, executable, opts, odir, kill_event = None, registry = None ):
         '''
         Represent a step on a generation process.
 
@@ -168,13 +160,14 @@ class Job(JobBase):
         :param kill_event: event associated to a possible "kill" signal. By \
         default an event is constructed.
         :type kill_event: threading.Event
-        :param register: whether to register this instance in the job manager.
-        :type register: bool
+        :param registry: instance to register the object. If "None", the \
+        object will be registered in the main :class:`JobManager` instance.
+        :type registry: JobRegistry or None
 
         :ivar executable: Command to be executed.
         :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
-        super(Job, self).__init__(odir, kill_event, register)
+        super(Job, self).__init__(odir, kill_event, registry)
 
         self._status = StatusCode.new
 
@@ -342,9 +335,9 @@ class Job(JobBase):
 
 class Step(Job):
 
-    __str_attrs__ = utils.merge_dicts(Job.__str_attrs__, {'data regex': '_data_regex'})
+    __str_attrs__ = utils.merge_dicts(Job.__str_attrs__, {'data regex': 'data_regex'})
 
-    def __init__( self, name, executable, opts, odir, kill_event, data_regex = None, data_builder = None, prev_step = None ):
+    def __init__( self, name, executable, opts, parent, data_regex = None, data_builder = None ):
         '''
         Represent a step on a generation process.
 
@@ -354,8 +347,8 @@ class Step(Job):
         :type executable: str
         :param opts: options to be passed to the executable.
         :type opts: list(str)
-        :param odir: where to create the output directory.
-        :type odir: str
+        :param parent: parent job.
+        :type parent: SteppedJob
         :param kill_event: event associated to a possible "kill" signal, to \
         be propagated among all the steps.
         :type kill_event: threading.Event
@@ -371,8 +364,6 @@ class Step(Job):
         specified, like: \
         <executable> --files file1 file2 ...
         :type data_builder: function
-        :param prev_step: possible previous step.
-        :type prev_step: Step
 
         :ivar executable: Command to be executed. Input data is added when the \
         process just before execution (once it is defined).
@@ -381,19 +372,20 @@ class Step(Job):
         to the executable.
         :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
-        super(Step, self).__init__(executable,
-                                   opts,
-                                   os.path.join(os.path.abspath(odir), name),
-                                   kill_event=kill_event,
-                                   register=False)
-
-        self.name = name
-
-        # Set the previous step queue
-        if prev_step is not None:
-            self._prev_queue = prev_step._queue
+        # Set the previous step queue. Need to do this before the object
+        # is registered
+        if len(parent.steps):
+            self._prev_queue = parent.steps[-1]._queue
         else:
             self._prev_queue = None
+
+        super(Step, self).__init__(executable,
+                                   opts,
+                                   os.path.join(os.path.abspath(parent._odir), name),
+                                   kill_event=parent._kill_event,
+                                   registry=parent.steps)
+
+        self.name = name
 
         # This is the queue associated to this step
         self._queue = queue.Queue()
@@ -404,7 +396,7 @@ class Step(Job):
         else:
             self.data_builder = data_builder
 
-        self._data_regex = re.compile(data_regex)
+        self.data_regex = data_regex
 
     def __del__( self ):
         '''
@@ -476,9 +468,11 @@ class Step(Job):
             if prev_queue is not None:
                 prev_queue.task_done()
 
+            dr = re.compile(self.data_regex)
+
             # Build and store the requested output files
             matches = filter(lambda s: s is not None,
-                             map(self._data_regex.match, os.listdir(self._odir)))
+                             map(dr.match, os.listdir(self._odir)))
 
             output = [os.path.join(self._odir, m.string) for m in matches]
 
@@ -509,7 +503,7 @@ class Step(Job):
 
 class SteppedJob(JobBase):
 
-    def __init__( self, path = None, register = True ):
+    def __init__( self, path = None, registry = None ):
         '''
         Instance to handle different steps, linked together. This object
         creates a new directory under "path" with a job ID. This job ID
@@ -518,15 +512,16 @@ class SteppedJob(JobBase):
 
         :param path: path to the desired directory.
         :type path: str
-        :param register: whether to register this instance in the job manager.
-        :type register: bool
+        :param registry: instance to register the object. If "None", the \
+        object will be registered in the main :class:`JobManager` instance.
+        :type registry: JobRegistry or None
 
         :ivar steps: Steps managed by this job.
         :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
-        super(SteppedJob, self).__init__(path, register=register)
+        super(SteppedJob, self).__init__(path, registry=registry)
 
-        self.steps = []
+        self.steps = JobRegistry()
 
     def __del__( self ):
         '''
@@ -572,19 +567,11 @@ class SteppedJob(JobBase):
             raise RuntimeError('Unable to create step "{}"; another '\
                                    'with the same name already exists')
 
-        if len(self.steps):
-            prev_step = self.steps[-1]
-        else:
-            prev_step = None
-
-        step = Step(name, executable, opts,
-                    odir=self._odir,
+        # The step is automatically registered, no need to append it to
+        # the inner registry.
+        step = Step(name, executable, opts, self,
                     data_regex=data_regex,
-                    kill_event=self._kill_event,
-                    data_builder=data_builder,
-                    prev_step=prev_step)
-
-        self.steps.append(step)
+                    data_builder=data_builder)
 
     def start( self, first = 0 ):
         '''

@@ -20,11 +20,11 @@ def test_job_base():
     '''
     j0 = stepped_job.JobBase('test_job_base')
 
-    assert j0 in stepped_job.JobManager().values()
+    assert j0 in stepped_job.JobManager()
 
-    j1 = stepped_job.JobBase('test_job_base', register=False)
+    j1 = stepped_job.JobBase('test_job_base', registry=stepped_job.JobRegistry())
 
-    assert j1 not in stepped_job.JobManager().values()
+    assert j1 not in stepped_job.JobManager()
 
 
 @using_directory('test_job')
@@ -35,14 +35,14 @@ def test_job():
     # Test registered job
     j0 = stepped_job.Job('python', ['-c', 'print("testing")'], 'test_job')
 
-    assert j0 in stepped_job.JobManager().values()
+    assert j0 in stepped_job.JobManager()
 
     j0.start()
 
-    # Test unregistered job
-    j1 = stepped_job.Job('python', ['-c', 'print("testing")'], 'test_job', register=None)
+    # Test job with a different registry
+    j1 = stepped_job.Job('python', ['-c', 'print("testing")'], 'test_job', registry=stepped_job.JobRegistry())
 
-    assert j1 not in stepped_job.JobManager().values()
+    assert j1 not in stepped_job.JobManager()
 
     j1.start()
 
@@ -59,7 +59,9 @@ def test_stepped_job():
     '''
     # Raise error if two steps have the same name
     job = stepped_job.SteppedJob('test_stepped_job')
+
     job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
+
     with pytest.raises(RuntimeError):
         job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
 
