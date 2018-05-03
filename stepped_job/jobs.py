@@ -211,8 +211,6 @@ class Job(JobBase):
         '''
         Create and run the process associated to this job.
         '''
-        import logging
-
         extra_opts = extra_opts if extra_opts is not None else []
 
         # Create the working directory
