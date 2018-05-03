@@ -68,6 +68,12 @@ class JobBase(object):
 
         self.jid = registry.register(self)
 
+    def __del__( self ):
+        '''
+        Kill running processes on deletion.
+        '''
+        self.kill()
+
     def __repr__( self ):
         '''
         Representation as a string.
@@ -194,9 +200,9 @@ class Job(JobBase):
         of the step.
         :type terminated_event: threading.Event
         '''
-        killed = self._run_process(kill_event)
+        self._run_process(kill_event)
 
-        if not killed:
+        if not kill_event.is_set():
             terminated_event.set()
 
     def _run_process( self, kill_event, extra_opts = None ):
@@ -205,11 +211,22 @@ class Job(JobBase):
         '''
         extra_opts = extra_opts if extra_opts is not None else []
 
-        # Create the working directory
+        # Create the working directory if it does not exist. If it does,
+        # remove the elements inside it but DO NOT remove the directory itself,
+        # since it may lead to conflicts between jobs.
         if os.path.exists(self._odir):
-            shutil.rmtree(self._odir)
+            logging.info('Removing all files in "{}"'.format(self._odir))
 
-        os.makedirs(self._odir)
+            for e in os.listdir(self._odir):
+
+                fp = os.path.join(self._odir, e)
+
+                if os.path.isdir(fp):
+                    shutil.rmtree(fp)
+                else:
+                    os.remove(fp)
+        else:
+            os.makedirs(self._odir)
 
         # Initialize the process
         proc = subprocess.Popen(self.command + extra_opts,
@@ -218,34 +235,25 @@ class Job(JobBase):
                                 stderr=open(os.path.join(self._odir, 'stderr'), 'wt')
         )
 
-        killed = False
-
         # Check whether the thread is asked to be killed
         while proc.poll() == None:
             if kill_event.is_set():
 
                 # Kill the running process
                 logging.getLogger(__name__).warning(
-                    'Killing running process for job "{}"'.format(self.name))
+                    'Killing running process for job "{}"'.format(self.full_jid()))
                 proc.kill()
 
                 # Really needed, otherwise it might enter again in the loop
                 proc.wait()
 
-                # Flag as killed
-                killed = True
-
         # If the process failed, propagate the "kill" signal
         if proc.poll():
 
             logging.getLogger(__name__).error(
-                'Job "{}" has failed; see output in {}'.format(self.name, self._odir))
-
-            killed = True
+                'Job "{}" has failed; see output in {}'.format(self.full_jid(), self._odir))
 
             kill_event.set()
-
-        return killed
 
     def peek( self, name = 'stdout', editor = None ):
         '''
@@ -430,15 +438,10 @@ class Step(Job):
 
             extra_opts = []
 
+        if not kill_event.is_set():
+            self._run_process(kill_event, extra_opts)
+
         if kill_event.is_set():
-
-            killed = True
-
-        else:
-
-            killed = self._run_process(kill_event, extra_opts)
-
-        if killed:
             # This message is displayed if this step is asked to be killed
             # or if the signal comes from other step. The "kill" signal is
             # propagated by including "None" as data to the next step.
@@ -507,6 +510,15 @@ class SteppedJob(JobBase):
         super(SteppedJob, self).__init__(path, registry=registry)
 
         self.steps = JobRegistry()
+
+    def __del__( self ):
+        '''
+        Kill running processes on deletion.
+        '''
+        self.kill()
+
+        for s in self.steps():
+            s.wait()
 
     def __str__( self ):
         '''

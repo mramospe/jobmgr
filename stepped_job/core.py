@@ -9,6 +9,7 @@ __email__   = ['miguel.ramos.pernas@cern.ch']
 import atexit
 import logging
 import threading
+import time
 
 # For python2 and python3 compatibility
 try:
@@ -16,39 +17,68 @@ try:
 except:
     import queue
 
-__all__ = ['JobManager', 'JobRegistry', 'manager', 'StatusCode']
+__all__ = ['JobManager', 'JobRegistry', 'manager', 'StatusCode', 'Watchdog']
 
 
-class Singleton(object):
+class Watchdog(object):
 
-    __instance    = None
-    __initialized = False
+    def __init__( self ):
 
-    def __init__( self, derived ):
+        super(Watchdog, self).__init__()
+
+        self._stop_event      = threading.Event()
+        self._terminate_event = threading.Event()
+        self._job_queue       = queue.Queue()
+
+        self._task = threading.Thread(target=self._watchdog,
+                                      args=(self._terminate_event,
+                                            self._stop_event,
+                                            self._job_queue))
+        self._task.daemon = True
+        self._task.start()
+
+    def __del__( self ):
+
+        self._terminate_event.set()
+        self._task.join()
+
+        while not self._job_queue.empty():
+            self._job_queue.get()
+
+    def _watchdog( self, terminate_event, stop_event, job_queue ):
         '''
-        Base class to represent a singleton.
-        If an attempt is made to create another object of this kind, the
-        same reference will be returned.
         '''
-        if derived.__initialized:
-            return
+        while not terminate_event.is_set():
 
-        super(Singleton, self).__init__()
+            # To reduce the CPU consumption
+            time.sleep(0.1)
 
-        derived.__initialized = True
+            if not stop_event.is_set():
 
-    def __new__( cls ):
+                jlst = []
+                while not job_queue.empty():
+                    j = job_queue.get()
+                    j.status()
+
+                    jlst.append(j)
+
+                for j in jlst:
+                    job_queue.put(j)
+
+    def start( self ):
         '''
-        Return the stored instance if it exists.
-
-        :returns: generated or already existing instance.
-        :rtype: cls
         '''
-        if cls.__initialized is False:
+        self._stop_event.unset()
 
-            cls.__instance = super(Singleton, cls).__new__(cls)
+    def stop( self ):
+        self._stop_event.set()
 
-        return cls.__instance
+    def terminate( self ):
+        self._terminate_event.set()
+        self._task.join()
+
+    def watch( self, job ):
+        self._job_queue.put(job)
 
 
 class JobRegistry(list):
@@ -61,10 +91,14 @@ class JobRegistry(list):
         '''
         super(JobRegistry, self).__init__()
 
+        self.watchdog = Watchdog()
+
     def __del__( self ):
         '''
         Safely kill the jobs and wait for completion.
         '''
+        self.watchdog.terminate()
+
         # Kill the non-terminated jobs
         for j in filter(lambda j: j.status() != StatusCode.terminated, self):
             j.kill()
@@ -107,16 +141,41 @@ class JobRegistry(list):
 
         self.append(job)
 
+        self.watchdog.watch(job)
+
         return jid
 
 
-class JobManager(Singleton, JobRegistry):
+class JobManager(JobRegistry):
+
+    __instance    = None
+    __initialized = False
 
     def __init__( self ):
         '''
         Singleton to hold and manage jobs.
+        If an attempt is made to create another object of this kind, the
+        same reference will be returned.
         '''
-        super(JobManager, self).__init__(self.__class__)
+        if JobManager.__initialized:
+            return
+
+        super(JobManager, self).__init__()
+
+        JobManager.__initialized = True
+
+    def __new__( cls ):
+        '''
+        Return the stored instance if it exists.
+
+        :returns: generated or already existing instance.
+        :rtype: cls
+        '''
+        if cls.__initialized is False:
+
+            cls.__instance = super(JobManager, cls).__new__(cls)
+
+        return cls.__instance
 
     def __del__( self ):
         '''

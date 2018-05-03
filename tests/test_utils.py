@@ -10,30 +10,24 @@ import os
 
 # Local
 import stepped_job
-from . import rm_tmp
 
 
-def test_create_dir():
+def test_create_dir( tmpdir ):
     '''
     Test for "create_dir"
     '''
-    # Check the name of the default directory
-    stepped_job.utils.create_dir()
-    rm_tmp(stepped_job.utils.__default_dir__)
-    assert os.path.exists(stepped_job.utils.__default_dir__)
-
     # Create another directory
-    new_dir = 'dummy'
+    path = tmpdir.join('dummy').strpath
 
-    stepped_job.utils.create_dir(new_dir)
-    rm_tmp(new_dir)
-    assert os.path.exists(new_dir)
+    stepped_job.utils.create_dir(path)
+
+    assert os.path.exists(path)
 
     # Check that, if called many times, the directories have different
     # numbers.
     for i in range(3):
-        stepped_job.utils.create_dir(new_dir)
-    assert list(sorted(map(int, os.listdir(new_dir)))) == list(range(4))
+        stepped_job.utils.create_dir(path)
+    assert list(sorted(map(int, os.listdir(path)))) == list(range(4))
 
 
 def test_merge_dicts():
