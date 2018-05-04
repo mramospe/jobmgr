@@ -37,5 +37,36 @@ def test_manager():
     '''
     Test the function to get the job manager.
     '''
-    # Test the function "manager"
     assert stepped_job.manager() is stepped_job.JobManager()
+
+
+def test_watchdog( tmpdir ):
+    '''
+    Test the behaviour of the Watchdog class.
+    '''
+    path = tmpdir.join('test_watchdog').strpath
+
+    cmd = ['-c', 'import time; time.sleep(0.3)']
+
+    reg = stepped_job.JobRegistry()
+
+    j0 = stepped_job.Job('python', cmd, path, registry=reg)
+    j1 = stepped_job.Job('python', cmd, path, registry=reg)
+    j2 = stepped_job.Job('python', cmd, path, registry=reg)
+
+    jobs = (j0, j1, j2)
+
+    # Start jobs
+    for j in jobs:
+        j.start()
+
+    # Wait for completion
+    for j in jobs:
+        j.wait()
+
+    # This ensures the status of the jobs are updated before the assert
+    reg.watchdog.stop()
+
+    assert all(
+        map(lambda j: j._status == stepped_job.StatusCode.terminated,jobs)
+        )

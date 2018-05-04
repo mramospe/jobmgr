@@ -20,67 +20,6 @@ except:
 __all__ = ['JobManager', 'JobRegistry', 'manager', 'StatusCode', 'Watchdog']
 
 
-class Watchdog(object):
-
-    def __init__( self ):
-
-        super(Watchdog, self).__init__()
-
-        self._stop_event      = threading.Event()
-        self._terminate_event = threading.Event()
-        self._job_queue       = queue.Queue()
-
-        self._task = threading.Thread(target=self._watchdog,
-                                      args=(self._terminate_event,
-                                            self._stop_event,
-                                            self._job_queue))
-        self._task.daemon = True
-        self._task.start()
-
-    def __del__( self ):
-
-        self._terminate_event.set()
-        self._task.join()
-
-        while not self._job_queue.empty():
-            self._job_queue.get()
-
-    def _watchdog( self, terminate_event, stop_event, job_queue ):
-        '''
-        '''
-        while not terminate_event.is_set():
-
-            # To reduce the CPU consumption
-            time.sleep(0.1)
-
-            if not stop_event.is_set():
-
-                jlst = []
-                while not job_queue.empty():
-                    j = job_queue.get()
-                    j.status()
-
-                    jlst.append(j)
-
-                for j in jlst:
-                    job_queue.put(j)
-
-    def start( self ):
-        '''
-        '''
-        self._stop_event.unset()
-
-    def stop( self ):
-        self._stop_event.set()
-
-    def terminate( self ):
-        self._terminate_event.set()
-        self._task.join()
-
-    def watch( self, job ):
-        self._job_queue.put(job)
-
-
 class JobRegistry(list):
 
     def __init__( self ):
@@ -97,7 +36,7 @@ class JobRegistry(list):
         '''
         Safely kill the jobs and wait for completion.
         '''
-        self.watchdog.terminate()
+        self.watchdog.stop()
 
         # Kill the non-terminated jobs
         for j in filter(lambda j: j.status() != StatusCode.terminated, self):
@@ -223,3 +162,87 @@ class StatusCode(object):
 
     killed = 'killed'
     ''' The job/step has failed or has been killed. '''
+
+
+class Watchdog(object):
+
+    def __init__( self ):
+        '''
+        Object to iterate over a set of jobs and update its status.
+        The objects are passed throguh the :method:`Watchdog.watch` method.
+        To be thread-safe, one must ensure to do not delete the jobs before
+        terminating the watchdog (through :method:`Watchdog.terminate`).
+        '''
+        super(Watchdog, self).__init__()
+
+        self._stop_event = threading.Event()
+        self._job_queue  = queue.Queue()
+        self._task       = None
+
+        self.start()
+
+    def __del__( self ):
+        '''
+        Terminate watching the jobs and free the queue.
+        '''
+        self._stop_event.set()
+        self._task.join()
+
+        while not self._job_queue.empty():
+            self._job_queue.get()
+
+    def _update_status( self ):
+        '''
+        Update the status of the jobs in the queue.
+        '''
+        jlst = []
+        while not self._job_queue.empty():
+            j = self._job_queue.get()
+            j.status()
+
+            jlst.append(j)
+
+        for j in jlst:
+            self._job_queue.put(j)
+
+    def _watchdog( self ):
+        '''
+        Main function to watch for the jobs.
+        '''
+        while not self._stop_event.is_set():
+
+            self._update_status()
+
+            # To reduce the CPU consumption
+            time.sleep(0.1)
+
+        # Do the last update before exiting
+        self._update_status()
+
+    def start( self ):
+        '''
+        Start monitoring the jobs.
+        '''
+        if self._task is None:
+            self._task = threading.Thread(target=self._watchdog)
+            self._task.daemon = True
+            self._task.start()
+
+    def stop( self ):
+        '''
+        Stop monitoring the jobs.
+
+        .. note::
+           This must be done before deleting the jobs, to prevent
+           destroying jobs in the queue.
+        '''
+        if self._task is not None:
+            self._stop_event.set()
+            self._task.join()
+            self._task = None
+
+    def watch( self, job ):
+        '''
+        Start monitoring the given job.
+        '''
+        self._job_queue.put(job)
