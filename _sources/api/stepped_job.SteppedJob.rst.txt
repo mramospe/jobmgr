@@ -1,23 +1,23 @@
-Job
-===
+SteppedJob
+==========
 
 .. currentmodule:: stepped_job
 
-.. autoclass:: Job
+.. autoclass:: SteppedJob
    :show-inheritance:
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
-      ~Job.peek
-      ~Job.start
-      ~Job.status
-      ~Job.wait
+      ~SteppedJob.add_step
+      ~SteppedJob.start
+      ~SteppedJob.status
+      ~SteppedJob.wait
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: peek
+   .. automethod:: add_step
    .. automethod:: start
    .. automethod:: status
    .. automethod:: wait

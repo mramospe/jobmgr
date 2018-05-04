@@ -1,0 +1,21 @@
+Watchdog
+========
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: Watchdog
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Watchdog.start
+      ~Watchdog.stop
+      ~Watchdog.watch
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: start
+   .. automethod:: stop
+   .. automethod:: watch

@@ -1,0 +1,25 @@
+JobBase
+=======
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: JobBase
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~JobBase.full_jid
+      ~JobBase.kill
+      ~JobBase.status
+      ~JobBase.update_status
+      ~JobBase.wait
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: full_jid
+   .. automethod:: kill
+   .. automethod:: status
+   .. automethod:: update_status
+   .. automethod:: wait

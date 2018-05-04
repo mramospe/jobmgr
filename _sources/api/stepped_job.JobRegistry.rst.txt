@@ -1,19 +1,17 @@
-Step
-====
+JobRegistry
+===========
 
 .. currentmodule:: stepped_job
 
-.. autoclass:: Step
+.. autoclass:: JobRegistry
    :show-inheritance:
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
-      ~Step.clear_input_data
-      ~Step.full_jid
+      ~JobRegistry.register
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: clear_input_data
-   .. automethod:: full_jid
+   .. automethod:: register

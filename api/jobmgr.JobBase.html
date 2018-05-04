@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>JobBase &#8212; jobmgr 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Job" href="jobmgr.Job.html" />
+    <link rel="prev" title="Watchdog" href="jobmgr.Watchdog.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="jobbase">
+<h1>JobBase<a class="headerlink" href="#jobbase" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="jobmgr.JobBase">
+<em class="property">class </em><code class="descclassname">jobmgr.</code><code class="descname">JobBase</code><span class="sig-paren">(</span><em>path</em>, <em>kill_event=None</em>, <em>registry=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class to create a directory for a job, holding also an ID and a
+status code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to the desired directory.</li>
+<li><strong>registry</strong> (<a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a> instance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><p class="first last"><strong>jid</strong> – Job ID, determined by the subdirectories in the output path.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.JobBase.full_jid" title="jobmgr.JobBase.full_jid"><code class="xref py py-obj docutils literal"><span class="pre">full_jid</span></code></a>()</td>
+<td>Return the full job ID for this job.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#jobmgr.JobBase.kill" title="jobmgr.JobBase.kill"><code class="xref py py-obj docutils literal"><span class="pre">kill</span></code></a>()</td>
+<td>Kill the job.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.JobBase.status" title="jobmgr.JobBase.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a>()</td>
+<td>Return the status of this job.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#jobmgr.JobBase.update_status" title="jobmgr.JobBase.update_status"><code class="xref py py-obj docutils literal"><span class="pre">update_status</span></code></a>()</td>
+<td>Update the status of the job.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.JobBase.wait" title="jobmgr.JobBase.wait"><code class="xref py py-obj docutils literal"><span class="pre">wait</span></code></a>()</td>
+<td>Wait till the job is done.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="jobmgr.JobBase.full_jid">
+<code class="descname">full_jid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase.full_jid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase.full_jid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the full job ID for this job.
+In this class it is just the index on the <a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><code class="xref py py-class docutils literal"><span class="pre">JobRegistry</span></code></a> object
+who owns it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">full name of this step.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="jobmgr.JobBase.kill">
+<code class="descname">kill</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill the job.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="jobmgr.JobBase.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the status of this job.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">status of this job.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="jobmgr.JobBase.update_status">
+<code class="descname">update_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase.update_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase.update_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the status of the job.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This method is reserved to be used by the class <a class="reference internal" href="jobmgr.Watchdog.html#jobmgr.Watchdog" title="jobmgr.Watchdog"><code class="xref py py-class docutils literal"><span class="pre">Watchdog</span></code></a>.
+Using it on your own might cause undefined behaviour.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="jobmgr.JobBase.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#JobBase.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.JobBase.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait till the job is done.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">jobmgr</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.manager.html">manager</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.SteppedJob.html">SteppedJob</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="jobmgr.Watchdog.html" title="previous chapter">Watchdog</a></li>
+      <li>Next: <a href="jobmgr.Job.html" title="next chapter">Job</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/api/jobmgr.JobBase.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

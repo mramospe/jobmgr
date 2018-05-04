@@ -1,0 +1,7 @@
+JobManager
+==========
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: JobManager
+   :show-inheritance:

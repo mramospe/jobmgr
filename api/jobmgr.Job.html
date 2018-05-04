@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Job &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <title>Job &#8212; jobmgr 0.0.0.dev0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Step" href="stepped_job.Step.html" />
-    <link rel="prev" title="JobBase" href="stepped_job.JobBase.html" />
+    <link rel="next" title="Step" href="jobmgr.Step.html" />
+    <link rel="prev" title="JobBase" href="jobmgr.JobBase.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -44,9 +44,9 @@
   <div class="section" id="job">
 <h1>Job<a class="headerlink" href="#job" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="stepped_job.Job">
-<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>executable</em>, <em>opts</em>, <em>odir</em>, <em>kill_event=None</em>, <em>registry=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">stepped_job.jobs.JobBase</span></code></p>
+<dt id="jobmgr.Job">
+<em class="property">class </em><code class="descclassname">jobmgr.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>executable</em>, <em>opts</em>, <em>odir</em>, <em>kill_event=None</em>, <em>registry=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">jobmgr.jobs.JobBase</span></code></p>
 <p>Represent a step on a generation process.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -58,7 +58,7 @@
 <li><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>)</em>) – options to be passed to the executable.</li>
 <li><strong>odir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – where to create the output directory.</li>
 <li><strong>kill_event</strong> (<a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Event" title="(in Python v3.6)"><em>threading.Event</em></a>) – event associated to a possible “kill” signal. By         default an event is constructed.</li>
-<li><strong>registry</strong> (<a class="reference internal" href="stepped_job.JobRegistry.html#stepped_job.JobRegistry" title="stepped_job.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="stepped_job.JobManager.html#stepped_job.JobManager" title="stepped_job.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a> instance.</li>
+<li><strong>registry</strong> (<a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a> instance.</li>
 </ul>
 </td>
 </tr>
@@ -77,24 +77,24 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Job.peek" title="stepped_job.Job.peek"><code class="xref py py-obj docutils literal"><span class="pre">peek</span></code></a>([name,&nbsp;editor])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.Job.peek" title="jobmgr.Job.peek"><code class="xref py py-obj docutils literal"><span class="pre">peek</span></code></a>([name,&nbsp;editor])</td>
 <td>Open the “stdout” or “stderr” file in terminal mode.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#stepped_job.Job.start" title="stepped_job.Job.start"><code class="xref py py-obj docutils literal"><span class="pre">start</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#jobmgr.Job.start" title="jobmgr.Job.start"><code class="xref py py-obj docutils literal"><span class="pre">start</span></code></a>()</td>
 <td>Create the associated task and start the job.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Job.status" title="stepped_job.Job.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a>()</td>
-<td>Return the status of this job.</td>
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.Job.update_status" title="jobmgr.Job.update_status"><code class="xref py py-obj docutils literal"><span class="pre">update_status</span></code></a>()</td>
+<td>Update the status of the job.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#stepped_job.Job.wait" title="stepped_job.Job.wait"><code class="xref py py-obj docutils literal"><span class="pre">wait</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#jobmgr.Job.wait" title="jobmgr.Job.wait"><code class="xref py py-obj docutils literal"><span class="pre">wait</span></code></a>()</td>
 <td>Wait till the task is done.</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
-<dt id="stepped_job.Job.peek">
-<code class="descname">peek</code><span class="sig-paren">(</span><em>name='stdout'</em>, <em>editor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Job.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job.peek" title="Permalink to this definition">¶</a></dt>
+<dt id="jobmgr.Job.peek">
+<code class="descname">peek</code><span class="sig-paren">(</span><em>name='stdout'</em>, <em>editor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Job.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Job.peek" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open the “stdout” or “stderr” file in terminal mode.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -117,32 +117,25 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="stepped_job.Job.start">
-<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Job.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job.start" title="Permalink to this definition">¶</a></dt>
+<dt id="jobmgr.Job.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Job.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Job.start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the associated task and start the job.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="stepped_job.Job.status">
-<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Job.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job.status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the status of this job. This is the correct way of
-accessing the status of the job, since it updates it on
-request.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">status of this job.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
-</tr>
-</tbody>
-</table>
+<dt id="jobmgr.Job.update_status">
+<code class="descname">update_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Job.update_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Job.update_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the status of the job.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This method is reserved to be used by the class <a class="reference internal" href="jobmgr.Watchdog.html#jobmgr.Watchdog" title="jobmgr.Watchdog"><code class="xref py py-class docutils literal"><span class="pre">Watchdog</span></code></a>.
+Using it on your own might cause undefined behaviour.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
-<dt id="stepped_job.Job.wait">
-<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Job.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Job.wait" title="Permalink to this definition">¶</a></dt>
+<dt id="jobmgr.Job.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Job.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Job.wait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait till the task is done.</p>
 </dd></dl>
 
@@ -156,7 +149,7 @@ request.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">stepped_job</a></h1>
+<h1 class="logo"><a href="../index.html">jobmgr</a></h1>
 
 
 
@@ -167,24 +160,25 @@ request.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.manager.html">manager</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobRegistry.html">JobRegistry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobBase.html">JobBase</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Job</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.Step.html">Step</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.SteppedJob.html">SteppedJob</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.SteppedJob.html">SteppedJob</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="stepped_job.JobBase.html" title="previous chapter">JobBase</a></li>
-      <li>Next: <a href="stepped_job.Step.html" title="next chapter">Step</a></li>
+      <li>Previous: <a href="jobmgr.JobBase.html" title="previous chapter">JobBase</a></li>
+      <li>Next: <a href="jobmgr.Step.html" title="next chapter">Step</a></li>
   </ul></li>
 </ul>
 </div>
@@ -210,7 +204,7 @@ request.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/stepped_job.Job.rst.txt"
+      <a href="../_sources/api/jobmgr.Job.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

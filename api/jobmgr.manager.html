@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>JobManager &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <title>manager &#8212; jobmgr 0.0.0.dev0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="JobRegistry" href="stepped_job.JobRegistry.html" />
-    <link rel="prev" title="manager" href="stepped_job.manager.html" />
+    <link rel="next" title="JobManager" href="jobmgr.JobManager.html" />
+    <link rel="prev" title="Introduction" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -41,14 +41,22 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="jobmanager">
-<h1>JobManager<a class="headerlink" href="#jobmanager" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="stepped_job.JobManager">
-<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">JobManager</code><a class="reference internal" href="../_modules/stepped_job/core.html#JobManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.JobManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">stepped_job.core.JobRegistry</span></code></p>
-<p>Singleton to hold and manage jobs. If an attempt is made to create
-another object of this kind, the same reference will be returned.</p>
+  <div class="section" id="manager">
+<h1>manager<a class="headerlink" href="#manager" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="jobmgr.manager">
+<code class="descclassname">jobmgr.</code><code class="descname">manager</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/core.html#manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the JobManager instance. This is equivalent to attempt to build     a new instance of <a class="reference internal" href="jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the instance to manage jobs.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager">JobManager</a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -59,7 +67,7 @@ another object of this kind, the same reference will be returned.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">stepped_job</a></h1>
+<h1 class="logo"><a href="../index.html">jobmgr</a></h1>
 
 
 
@@ -69,25 +77,26 @@ another object of this kind, the same reference will be returned.</p>
 
 
 <h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobRegistry.html">JobRegistry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobBase.html">JobBase</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.Step.html">Step</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.SteppedJob.html">SteppedJob</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">manager</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.SteppedJob.html">SteppedJob</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="stepped_job.manager.html" title="previous chapter">manager</a></li>
-      <li>Next: <a href="stepped_job.JobRegistry.html" title="next chapter">JobRegistry</a></li>
+      <li>Previous: <a href="../index.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="jobmgr.JobManager.html" title="next chapter">JobManager</a></li>
   </ul></li>
 </ul>
 </div>
@@ -113,7 +122,7 @@ another object of this kind, the same reference will be returned.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/stepped_job.JobManager.rst.txt"
+      <a href="../_sources/api/jobmgr.manager.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

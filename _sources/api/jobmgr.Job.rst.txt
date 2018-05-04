@@ -1,7 +1,7 @@
 Job
 ===
 
-.. currentmodule:: stepped_job
+.. currentmodule:: jobmgr
 
 .. autoclass:: Job
    :show-inheritance:
@@ -12,12 +12,12 @@ Job
 
       ~Job.peek
       ~Job.start
-      ~Job.status
+      ~Job.update_status
       ~Job.wait
 
    .. rubric:: Methods Documentation
 
    .. automethod:: peek
    .. automethod:: start
-   .. automethod:: status
+   .. automethod:: update_status
    .. automethod:: wait

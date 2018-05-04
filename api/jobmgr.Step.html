@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Step &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <title>Step &#8212; jobmgr 0.0.0.dev0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="SteppedJob" href="stepped_job.SteppedJob.html" />
-    <link rel="prev" title="Job" href="stepped_job.Job.html" />
+    <link rel="next" title="SteppedJob" href="jobmgr.SteppedJob.html" />
+    <link rel="prev" title="Job" href="jobmgr.Job.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -44,26 +44,28 @@
   <div class="section" id="step">
 <h1>Step<a class="headerlink" href="#step" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="stepped_job.Step">
-<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">Step</code><span class="sig-paren">(</span><em>name</em>, <em>executable</em>, <em>opts</em>, <em>parent</em>, <em>data_regex=None</em>, <em>data_builder=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">stepped_job.jobs.Job</span></code></p>
+<dt id="jobmgr.Step">
+<em class="property">class </em><code class="descclassname">jobmgr.</code><code class="descname">Step</code><span class="sig-paren">(</span><em>name</em>, <em>executable</em>, <em>opts</em>, <em>parent</em>, <em>data_regex=None</em>, <em>data_builder=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">jobmgr.jobs.Job</span></code></p>
 <p>Represent a step on a generation process.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – name of the step. It must be unique within a job.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – name of the step.</li>
 <li><strong>executable</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – application/version to run.</li>
 <li><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>)</em>) – options to be passed to the executable.</li>
-<li><strong>parent</strong> (<a class="reference internal" href="stepped_job.SteppedJob.html#stepped_job.SteppedJob" title="stepped_job.SteppedJob"><em>SteppedJob</em></a>) – parent job.</li>
-<li><strong>kill_event</strong> (<a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Event" title="(in Python v3.6)"><em>threading.Event</em></a>) – event associated to a possible “kill” signal, to         be propagated among all the steps.</li>
+<li><strong>parent</strong> (<a class="reference internal" href="jobmgr.SteppedJob.html#jobmgr.SteppedJob" title="jobmgr.SteppedJob"><em>SteppedJob</em></a>) – parent job, inheriting from <a class="reference internal" href="jobmgr.SteppedJob.html#jobmgr.SteppedJob" title="jobmgr.SteppedJob"><code class="xref py py-class docutils literal"><span class="pre">SteppedJob</span></code></a>.</li>
 <li><strong>data_regex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – regex representing the output data to send to the         next step.</li>
 <li><strong>data_builder</strong> (<em>function</em>) – function to define the way how the data is passed         to the executable. It must take a list of strings (paths to the data         files), and return a merged string. The default behaviour is to         return list to be executed as:         &lt;executable&gt; file1 file2 …         but one can also define the string so the argument is explicitely         specified, like:         &lt;executable&gt; –files file1 file2 …</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.6)"><strong>RuntimeError</strong></a> – if the name used for this step is already         being used in another step.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
 <li><strong>executable</strong> – Command to be executed. Input data is added when the         process just before execution (once it is defined).</li>
 <li><strong>name</strong> – Name of the step.</li>
 <li><strong>data_builder</strong> – Function that modifies the input data to parse it         to the executable.</li>
@@ -80,26 +82,26 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.Step.clear_input_data" title="stepped_job.Step.clear_input_data"><code class="xref py py-obj docutils literal"><span class="pre">clear_input_data</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="#jobmgr.Step.clear_input_data" title="jobmgr.Step.clear_input_data"><code class="xref py py-obj docutils literal"><span class="pre">clear_input_data</span></code></a>()</td>
 <td>Remove the input data from this step.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#stepped_job.Step.full_jid" title="stepped_job.Step.full_jid"><code class="xref py py-obj docutils literal"><span class="pre">full_jid</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#jobmgr.Step.full_jid" title="jobmgr.Step.full_jid"><code class="xref py py-obj docutils literal"><span class="pre">full_jid</span></code></a>()</td>
 <td>Return the full job ID for this step.</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
-<dt id="stepped_job.Step.clear_input_data">
-<code class="descname">clear_input_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Step.clear_input_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.clear_input_data" title="Permalink to this definition">¶</a></dt>
+<dt id="jobmgr.Step.clear_input_data">
+<code class="descname">clear_input_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Step.clear_input_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Step.clear_input_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove the input data from this step.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="stepped_job.Step.full_jid">
-<code class="descname">full_jid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#Step.full_jid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.Step.full_jid" title="Permalink to this definition">¶</a></dt>
+<dt id="jobmgr.Step.full_jid">
+<code class="descname">full_jid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jobmgr/jobs.html#Step.full_jid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jobmgr.Step.full_jid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the full job ID for this step.
-This is the addition of the index on the <a class="reference internal" href="stepped_job.JobRegistry.html#stepped_job.JobRegistry" title="stepped_job.JobRegistry"><code class="xref py py-class docutils literal"><span class="pre">JobRegistry</span></code></a> object
+This is the addition of the index on the <a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><code class="xref py py-class docutils literal"><span class="pre">JobRegistry</span></code></a> object
 who owns it and its name.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -123,7 +125,7 @@ who owns it and its name.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">stepped_job</a></h1>
+<h1 class="logo"><a href="../index.html">jobmgr</a></h1>
 
 
 
@@ -134,24 +136,25 @@ who owns it and its name.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.manager.html">manager</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobRegistry.html">JobRegistry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobBase.html">JobBase</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.Job.html">Job</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Step</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.SteppedJob.html">SteppedJob</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.SteppedJob.html">SteppedJob</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="stepped_job.Job.html" title="previous chapter">Job</a></li>
-      <li>Next: <a href="stepped_job.SteppedJob.html" title="next chapter">SteppedJob</a></li>
+      <li>Previous: <a href="jobmgr.Job.html" title="previous chapter">Job</a></li>
+      <li>Next: <a href="jobmgr.SteppedJob.html" title="next chapter">SteppedJob</a></li>
   </ul></li>
 </ul>
 </div>
@@ -177,7 +180,7 @@ who owns it and its name.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/stepped_job.Step.rst.txt"
+      <a href="../_sources/api/jobmgr.Step.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

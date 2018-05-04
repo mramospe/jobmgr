@@ -1,0 +1,23 @@
+StatusCode
+==========
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: StatusCode
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~StatusCode.killed
+      ~StatusCode.new
+      ~StatusCode.running
+      ~StatusCode.terminated
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: killed
+   .. autoattribute:: new
+   .. autoattribute:: running
+   .. autoattribute:: terminated

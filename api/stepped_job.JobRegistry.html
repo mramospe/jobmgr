@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>JobManager &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <title>JobRegistry &#8212; stepped_job 0.0.0.dev0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="JobRegistry" href="stepped_job.JobRegistry.html" />
-    <link rel="prev" title="manager" href="stepped_job.manager.html" />
+    <link rel="next" title="StatusCode" href="stepped_job.StatusCode.html" />
+    <link rel="prev" title="JobManager" href="stepped_job.JobManager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -41,14 +41,44 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="jobmanager">
-<h1>JobManager<a class="headerlink" href="#jobmanager" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="jobregistry">
+<h1>JobRegistry<a class="headerlink" href="#jobregistry" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="stepped_job.JobManager">
-<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">JobManager</code><a class="reference internal" href="../_modules/stepped_job/core.html#JobManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.JobManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">stepped_job.core.JobRegistry</span></code></p>
-<p>Singleton to hold and manage jobs. If an attempt is made to create
-another object of this kind, the same reference will be returned.</p>
+<dt id="stepped_job.JobRegistry">
+<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">JobRegistry</code><a class="reference internal" href="../_modules/stepped_job/core.html#JobRegistry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.JobRegistry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a></p>
+<p>Represent a registry of jobs.</p>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.JobRegistry.register" title="stepped_job.JobRegistry.register"><code class="xref py py-obj docutils literal"><span class="pre">register</span></code></a>(job)</td>
+<td>Register the given job, returning its new job ID.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="stepped_job.JobRegistry.register">
+<code class="descname">register</code><span class="sig-paren">(</span><em>job</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/core.html#JobRegistry.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.JobRegistry.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register the given job, returning its new job ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>job</strong> (<a class="reference internal" href="stepped_job.JobBase.html#stepped_job.JobBase" title="stepped_job.JobBase"><em>JobBase</em></a>) – input job.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">next available job ID.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -73,8 +103,8 @@ another object of this kind, the same reference will be returned.</p>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">JobRegistry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.JobBase.html">JobBase</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
@@ -86,8 +116,8 @@ another object of this kind, the same reference will be returned.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="stepped_job.manager.html" title="previous chapter">manager</a></li>
-      <li>Next: <a href="stepped_job.JobRegistry.html" title="next chapter">JobRegistry</a></li>
+      <li>Previous: <a href="stepped_job.JobManager.html" title="previous chapter">JobManager</a></li>
+      <li>Next: <a href="stepped_job.StatusCode.html" title="next chapter">StatusCode</a></li>
   </ul></li>
 </ul>
 </div>
@@ -113,7 +143,7 @@ another object of this kind, the same reference will be returned.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/stepped_job.JobManager.rst.txt"
+      <a href="../_sources/api/stepped_job.JobRegistry.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

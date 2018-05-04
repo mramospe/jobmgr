@@ -1,0 +1,677 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>jobmgr.jobs &#8212; jobmgr 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for jobmgr.jobs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Definition of job-like classes.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
+<span class="n">__email__</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
+
+<span class="c1"># Python</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">distutils.spawn</span> <span class="k">import</span> <span class="n">find_executable</span>
+
+<span class="c1"># For python2 and python3 compatibility</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">Queue</span> <span class="k">as</span> <span class="nn">queue</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">queue</span>
+
+<span class="c1"># Local</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">JobManager</span><span class="p">,</span> <span class="n">JobRegistry</span><span class="p">,</span> <span class="n">StatusCode</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;JobBase&#39;</span><span class="p">,</span> <span class="s1">&#39;Job&#39;</span><span class="p">,</span> <span class="s1">&#39;Step&#39;</span><span class="p">,</span> <span class="s1">&#39;SteppedJob&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="JobBase"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase">[docs]</a><span class="k">class</span> <span class="nc">JobBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">__str_attrs__</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;status&#39;</span>      <span class="p">:</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;output path&#39;</span> <span class="p">:</span> <span class="s1">&#39;_odir&#39;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill_event</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">registry</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base class to create a directory for a job, holding also an ID and a</span>
+<span class="sd">        status code.</span>
+
+<span class="sd">        :param path: path to the desired directory.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
+<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        :type registry: JobRegistry or None</span>
+
+<span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_odir</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">create_dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">new</span>
+
+        <span class="c1"># Store the associated &quot;kill&quot; event</span>
+        <span class="k">if</span> <span class="n">kill_event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span> <span class="o">=</span> <span class="n">kill_event</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="c1"># Event to determine if the thread terminated without errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="c1"># Register the object</span>
+        <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">registry</span> <span class="o">=</span> <span class="n">JobManager</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">jid</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Kill running processes on deletion.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Representation as a string.</span>
+
+<span class="sd">        :returns: this class as a string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Representation as a string.</span>
+
+<span class="sd">        :returns: this class as a string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">maxl</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str_attrs__</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__str_attrs__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="n">attr</span><span class="p">()</span>
+
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; {:&lt;</span><span class="si">{}</span><span class="s1">} = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">maxl</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; </span><span class="si">{}</span><span class="s1">: (&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_jid</span><span class="p">())]</span> <span class="o">+</span> <span class="n">out</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39; )&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="JobBase.full_jid"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase.full_jid">[docs]</a>    <span class="k">def</span> <span class="nf">full_jid</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the full job ID for this job.</span>
+<span class="sd">        In this class it is just the index on the :class:`JobRegistry` object</span>
+<span class="sd">        who owns it.</span>
+
+<span class="sd">        :returns: full name of this step.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JobBase.kill"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase.kill">[docs]</a>    <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Kill the job.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="JobBase.update_status"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase.update_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_status</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Update the status of the job.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">           This method is reserved to be used by the class :class:`Watchdog`.</span>
+<span class="sd">           Using it on your own might cause undefined behaviour.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="JobBase.status"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the status of this job.</span>
+
+<span class="sd">        :returns: status of this job.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
+
+<div class="viewcode-block" id="JobBase.wait"><a class="viewcode-back" href="../../api/jobmgr.JobBase.html#jobmgr.JobBase.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait till the job is done.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">JobBase</span><span class="p">):</span>
+
+    <span class="n">__str_attrs__</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">merge_dicts</span><span class="p">(</span><span class="n">JobBase</span><span class="o">.</span><span class="n">__str_attrs__</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;command&#39;</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">executable</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">odir</span><span class="p">,</span> <span class="n">kill_event</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">registry</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent a step on a generation process.</span>
+
+<span class="sd">        :param name: name of the job.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param executable: application/version to run.</span>
+<span class="sd">        :type executable: str</span>
+<span class="sd">        :param opts: options to be passed to the executable.</span>
+<span class="sd">        :type opts: list(str)</span>
+<span class="sd">        :param odir: where to create the output directory.</span>
+<span class="sd">        :type odir: str</span>
+<span class="sd">        :param kill_event: event associated to a possible &quot;kill&quot; signal. By \</span>
+<span class="sd">        default an event is constructed.</span>
+<span class="sd">        :type kill_event: threading.Event</span>
+<span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
+<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        :type registry: JobRegistry or None</span>
+
+<span class="sd">        :ivar executable: Command to be executed.</span>
+<span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Job</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">odir</span><span class="p">,</span> <span class="n">kill_event</span><span class="p">,</span> <span class="n">registry</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">new</span>
+
+        <span class="c1"># Build the command to execute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">executable</span><span class="p">]</span> <span class="o">+</span> <span class="n">opts</span>
+
+        <span class="c1"># To hold the task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function to be sent to a new thread, and execute the step process.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_run_process</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_run_process</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">extra_opts</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create and run the process associated to this job.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">extra_opts</span> <span class="o">=</span> <span class="n">extra_opts</span> <span class="k">if</span> <span class="n">extra_opts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+
+        <span class="c1"># Create the working directory if it does not exist. If it does,</span>
+        <span class="c1"># remove the elements inside it but DO NOT remove the directory itself,</span>
+        <span class="c1"># since it may lead to conflicts between jobs.</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Removing all files in &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">):</span>
+
+                <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">)</span>
+
+        <span class="c1"># Initialize the process</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">+</span> <span class="n">extra_opts</span><span class="p">,</span>
+                                <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span>
+                                <span class="n">stdout</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span> <span class="s1">&#39;stdout&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">),</span>
+                                <span class="n">stderr</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check whether the thread is asked to be killed</span>
+        <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+
+                <span class="c1"># Kill the running process</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;Killing running process for job &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_jid</span><span class="p">()))</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+                <span class="c1"># Really needed, otherwise it might enter again in the loop</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="c1"># If the process failed, propagate the &quot;kill&quot; signal</span>
+        <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">():</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;Job &quot;</span><span class="si">{}</span><span class="s1">&quot; has failed; see output in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_jid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Job.peek"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job.peek">[docs]</a>    <span class="k">def</span> <span class="nf">peek</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="n">editor</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Open the &quot;stdout&quot; or &quot;stderr&quot; file in terminal mode.</span>
+
+<span class="sd">        :param name: log-file to open (&quot;stdout&quot; or &quot;stderr&quot;). The default is \</span>
+<span class="sd">        &quot;stdout&quot;.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param editor: editor to open. If None is provided, then it will \</span>
+<span class="sd">        try to use &quot;emacs&quot; or &quot;vi&quot; to open the file. A RuntimeError is \</span>
+<span class="sd">        raised if none of them exist in the system, or a ValueError if \</span>
+<span class="sd">        the provided editor is not accesible.</span>
+<span class="sd">        :raises ValueError: if name is not &quot;stdout&quot; or &quot;stderr&quot;, or if \</span>
+<span class="sd">        the provided editor is not accesible.</span>
+<span class="sd">        :raises RuntimeError: if &quot;editor = None&quot; and neither &quot;emacs&quot; \</span>
+<span class="sd">        nor &quot;vi&quot; are accesible.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;File to peek must be either &quot;stdout&quot; or &quot;stderr&quot;&#39;</span><span class="p">)</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">editor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">find_executable</span><span class="p">(</span><span class="s1">&#39;emacs&#39;</span><span class="p">):</span>
+                <span class="n">editor</span> <span class="o">=</span> <span class="s1">&#39;emacs -nw&#39;</span>
+            <span class="k">elif</span> <span class="n">find_executable</span><span class="p">(</span><span class="s1">&#39;vi&#39;</span><span class="p">):</span>
+                <span class="n">editor</span> <span class="o">=</span> <span class="s1">&#39;vi&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to find an apropiate text editor. &#39;</span>\
+                                       <span class="s1">&#39;You can suggest one using the &#39;</span>\
+                                       <span class="s1">&#39;argument &quot;editor&quot;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">find_executable</span><span class="p">(</span><span class="n">editor</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to find executable with name &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span>\
+                                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">editor</span><span class="p">))</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">editor</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Job.start"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create the associated task and start the job.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Job.update_status"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job.update_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_status</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Update the status of the job.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">           This method is reserved to be used by the class :class:`Watchdog`.</span>
+<span class="sd">           Using it on your own might cause undefined behaviour.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span></div>
+
+<div class="viewcode-block" id="Job.wait"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait till the task is done.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Step"><a class="viewcode-back" href="../../api/jobmgr.Step.html#jobmgr.Step">[docs]</a><span class="k">class</span> <span class="nc">Step</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+
+    <span class="n">__str_attrs__</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">merge_dicts</span><span class="p">(</span><span class="n">Job</span><span class="o">.</span><span class="n">__str_attrs__</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;data regex&#39;</span><span class="p">:</span> <span class="s1">&#39;data_regex&#39;</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">executable</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">data_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data_builder</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent a step on a generation process.</span>
+
+<span class="sd">        :param name: name of the step.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param executable: application/version to run.</span>
+<span class="sd">        :type executable: str</span>
+<span class="sd">        :param opts: options to be passed to the executable.</span>
+<span class="sd">        :type opts: list(str)</span>
+<span class="sd">        :param parent: parent job, inheriting from :class:`SteppedJob`.</span>
+<span class="sd">        :type parent: SteppedJob</span>
+<span class="sd">        :param data_regex: regex representing the output data to send to the \</span>
+<span class="sd">        next step.</span>
+<span class="sd">        :type data_regex: str</span>
+<span class="sd">        :param data_builder: function to define the way how the data is passed \</span>
+<span class="sd">        to the executable. It must take a list of strings (paths to the data \</span>
+<span class="sd">        files), and return a merged string. The default behaviour is to \</span>
+<span class="sd">        return list to be executed as: \</span>
+<span class="sd">        &lt;executable&gt; file1 file2 ... \</span>
+<span class="sd">        but one can also define the string so the argument is explicitely \</span>
+<span class="sd">        specified, like: \</span>
+<span class="sd">        &lt;executable&gt; --files file1 file2 ...</span>
+<span class="sd">        :type data_builder: function</span>
+<span class="sd">        :raises RuntimeError: if the name used for this step is already \</span>
+<span class="sd">        being used in another step.</span>
+
+<span class="sd">        :ivar executable: Command to be executed. Input data is added when the \</span>
+<span class="sd">        process just before execution (once it is defined).</span>
+<span class="sd">        :ivar name: Name of the step.</span>
+<span class="sd">        :ivar data_builder: Function that modifies the input data to parse it \</span>
+<span class="sd">        to the executable.</span>
+<span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to create step &quot;</span><span class="si">{}</span><span class="s1">&quot;; another &#39;</span>\
+                               <span class="s1">&#39;with the same name already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="c1"># Set the previous step queue. Need to do this before the object</span>
+        <span class="c1"># is registered</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">steps</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_queue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Step</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">executable</span><span class="p">,</span>
+                                   <span class="n">opts</span><span class="p">,</span>
+                                   <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_odir</span><span class="p">),</span> <span class="n">name</span><span class="p">),</span>
+                                   <span class="n">kill_event</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">_kill_event</span><span class="p">,</span>
+                                   <span class="n">registry</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="c1"># This is the queue associated to this step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+        <span class="c1"># Set the command to define how the data is parsed to the executable</span>
+        <span class="k">if</span> <span class="n">data_builder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_builder</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_builder</span> <span class="o">=</span> <span class="n">data_builder</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_regex</span> <span class="o">=</span> <span class="n">data_regex</span>
+
+    <span class="k">def</span> <span class="nf">_execute</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function to be sent to a new thread, and execute the step process.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Get data from previous queue if it exists, and prepare input</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="n">extra_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_builder</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># This is the first job, it has no input data</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">extra_opts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_process</span><span class="p">(</span><span class="n">extra_opts</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+            <span class="c1"># This message is displayed if this step is asked to be killed</span>
+            <span class="c1"># or if the signal comes from other step. The &quot;kill&quot; signal is</span>
+            <span class="c1"># propagated by including &quot;None&quot; as data to the next step.</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Step &quot;</span><span class="si">{}</span><span class="s1">&quot; has been killed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Notify the previous queue that we have finished</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+            <span class="n">dr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_regex</span><span class="p">)</span>
+
+            <span class="c1"># Build and store the requested output files</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="nb">map</span><span class="p">(</span><span class="n">dr</span><span class="o">.</span><span class="n">match</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">)))</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_odir</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">string</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Step.clear_input_data"><a class="viewcode-back" href="../../api/jobmgr.Step.html#jobmgr.Step.clear_input_data">[docs]</a>    <span class="k">def</span> <span class="nf">clear_input_data</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Remove the input data from this step.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Step.full_jid"><a class="viewcode-back" href="../../api/jobmgr.Step.html#jobmgr.Step.full_jid">[docs]</a>    <span class="k">def</span> <span class="nf">full_jid</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the full job ID for this step.</span>
+<span class="sd">        This is the addition of the index on the :class:`JobRegistry` object</span>
+<span class="sd">        who owns it and its name.</span>
+
+<span class="sd">        :returns: full name of this step.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SteppedJob"><a class="viewcode-back" href="../../api/jobmgr.SteppedJob.html#jobmgr.SteppedJob">[docs]</a><span class="k">class</span> <span class="nc">SteppedJob</span><span class="p">(</span><span class="n">JobBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">registry</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Instance to handle different steps, linked together. This object</span>
+<span class="sd">        creates a new directory under &quot;path&quot; with a job ID. This job ID</span>
+<span class="sd">        is expected to be a number, and the next to the greatest in the</span>
+<span class="sd">        directory will be associated to the job (0 if none is found).</span>
+
+<span class="sd">        :param path: path to the desired directory.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
+<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        :type registry: JobRegistry or None</span>
+
+<span class="sd">        :ivar steps: Steps managed by this job.</span>
+<span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SteppedJob</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">JobRegistry</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Kill running processes on deletion.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Representation as a string.</span>
+
+<span class="sd">        :returns: this class as a string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;Job </span><span class="si">{}</span><span class="s1"> with steps:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">))</span>
+
+<div class="viewcode-block" id="SteppedJob.start"><a class="viewcode-back" href="../../api/jobmgr.SteppedJob.html#jobmgr.SteppedJob.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">first</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Start the job from the given step ID.</span>
+
+<span class="sd">        :param first: step ID to start processing.</span>
+<span class="sd">        :type first: int or str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Restarting unfinished job </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kill_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Job </span><span class="si">{}</span><span class="s1"> with steps: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">,</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">first</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="s1">&#39;Unable to find step with name &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">first</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Starting job </span><span class="si">{}</span><span class="s1"> from step &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">clear_input_data</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">i</span><span class="p">:]:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SteppedJob.update_status"><a class="viewcode-back" href="../../api/jobmgr.SteppedJob.html#jobmgr.SteppedJob.update_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_status</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Update the status of the job.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">           This method is reserved to be used by the class :class:`Watchdog`.</span>
+<span class="sd">           Using it on your own might cause undefined behaviour.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Job terminated&#39;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">terminated</span>
+
+            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)):</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;Job </span><span class="si">{}</span><span class="s1"> has been killed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jid</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">killed</span></div>
+
+<div class="viewcode-block" id="SteppedJob.wait"><a class="viewcode-back" href="../../api/jobmgr.SteppedJob.html#jobmgr.SteppedJob.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for the steps for completion.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">jobmgr</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.manager.html">manager</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.SteppedJob.html">SteppedJob</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

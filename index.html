@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Introduction &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <title>Introduction &#8212; jobmgr 0.0.0.dev0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="manager" href="api/stepped_job.manager.html" />
+    <link rel="next" title="manager" href="api/jobmgr.manager.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -45,20 +45,24 @@
 <p>This package is aimed to provide a simple and friendly interface to launch jobs
 with many steps in each of them. The steps are assumed to be related, so the
 output data from the first is used in the second, successively.</p>
+<p>Together with this package, an executable called “job_mgr” is also installed,
+which allows to define a more friendly interface to handle the jobs (using
+IPython). This is the prefered way of working, although one can use a simple
+python session for this purpose.</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation:<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>To use this package, clone the repository and install with <cite>pip</cite>:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone https://github.com/mramospe/stepped_job.git
-pip install stepped_job
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone https://github.com/mramospe/jobmgr.git
+pip install jobmgr
 </pre></div>
 </div>
 </div>
 <div class="section" id="functions-and-classes">
 <h1>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h1>
 <p>Here you can find the documentation on the functions and classes
-of the stepped_job package. The class inheritance diagram is also shown.</p>
-<span class="target" id="module-stepped_job"></span><div class="section" id="functions">
+of the jobmgr package. The class inheritance diagram is also shown.</p>
+<span class="target" id="module-jobmgr"></span><div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -66,7 +70,7 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.manager.html#stepped_job.manager" title="stepped_job.manager"><code class="xref py py-obj docutils literal"><span class="pre">manager</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.manager.html#jobmgr.manager" title="jobmgr.manager"><code class="xref py py-obj docutils literal"><span class="pre">manager</span></code></a>()</td>
 <td>Return the JobManager instance.</td>
 </tr>
 </tbody>
@@ -80,26 +84,38 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.Job.html#stepped_job.Job" title="stepped_job.Job"><code class="xref py py-obj docutils literal"><span class="pre">Job</span></code></a>([path])</td>
-<td>Instance to handle different steps, linked together.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/stepped_job.JobManager.html#stepped_job.JobManager" title="stepped_job.JobManager"><code class="xref py py-obj docutils literal"><span class="pre">JobManager</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-obj docutils literal"><span class="pre">JobManager</span></code></a>()</td>
 <td>Singleton to hold and manage jobs.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/stepped_job.StatusCode.html#stepped_job.StatusCode" title="stepped_job.StatusCode"><code class="xref py py-obj docutils literal"><span class="pre">StatusCode</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="api/jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><code class="xref py py-obj docutils literal"><span class="pre">JobRegistry</span></code></a>()</td>
+<td>Represent a registry of jobs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.StatusCode.html#jobmgr.StatusCode" title="jobmgr.StatusCode"><code class="xref py py-obj docutils literal"><span class="pre">StatusCode</span></code></a></td>
 <td>Hold the different possible status of jobs and steps.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/stepped_job.Step.html#stepped_job.Step" title="stepped_job.Step"><code class="xref py py-obj docutils literal"><span class="pre">Step</span></code></a>(name,&nbsp;executable,&nbsp;opts,&nbsp;odir,&nbsp;kill_event)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/jobmgr.Watchdog.html#jobmgr.Watchdog" title="jobmgr.Watchdog"><code class="xref py py-obj docutils literal"><span class="pre">Watchdog</span></code></a>()</td>
+<td>Object to iterate over a set of jobs and update its status.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.JobBase.html#jobmgr.JobBase" title="jobmgr.JobBase"><code class="xref py py-obj docutils literal"><span class="pre">JobBase</span></code></a>(path[,&nbsp;kill_event,&nbsp;registry])</td>
+<td>Base class to create a directory for a job, holding also an ID and a status code.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/jobmgr.Job.html#jobmgr.Job" title="jobmgr.Job"><code class="xref py py-obj docutils literal"><span class="pre">Job</span></code></a>(executable,&nbsp;opts,&nbsp;odir[,&nbsp;kill_event,&nbsp;…])</td>
 <td>Represent a step on a generation process.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.Step.html#jobmgr.Step" title="jobmgr.Step"><code class="xref py py-obj docutils literal"><span class="pre">Step</span></code></a>(name,&nbsp;executable,&nbsp;opts,&nbsp;parent[,&nbsp;…])</td>
+<td>Represent a step on a generation process.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/jobmgr.SteppedJob.html#jobmgr.SteppedJob" title="jobmgr.SteppedJob"><code class="xref py py-obj docutils literal"><span class="pre">SteppedJob</span></code></a>([path,&nbsp;registry])</td>
+<td>Instance to handle different steps, linked together.</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-96c4b5013a208062536b74da7368e54a0054dd07.png" alt="Inheritance diagram of stepped_job.core.Job, stepped_job.core.JobManager, stepped_job.core.StatusCode, stepped_job.core.Step" usemap="#inheritancee493a58439" class="inheritance"/>
-<map id="inheritancee493a58439" name="inheritancee493a58439">
-<area shape="rect" id="node3" title="Hold the different possible status of jobs and steps." alt="" coords="5,55,103,80"/>
+<img src="_images/inheritance-06a319450050cadf9f6b006f18a345804ab2f6ba.png" alt="Inheritance diagram of jobmgr.core.JobManager, jobmgr.core.JobRegistry, jobmgr.core.StatusCode, jobmgr.core.Watchdog, jobmgr.jobs.JobBase, jobmgr.jobs.Job, jobmgr.jobs.Step, jobmgr.jobs.SteppedJob" usemap="#inheritancee88ddf90ec" class="inheritance"/>
+<map id="inheritancee88ddf90ec" name="inheritancee88ddf90ec">
+<area shape="rect" id="node5" title="Hold the different possible status of jobs and steps." alt="" coords="5,55,103,80"/>
 </map>
 </div>
 </div>
@@ -118,7 +134,7 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">stepped_job</a></h1>
+<h1 class="logo"><a href="#">jobmgr</a></h1>
 
 
 
@@ -129,20 +145,24 @@ of the stepped_job package. The class inheritance diagram is also shown.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.manager.html">manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.manager.html">manager</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Job.html">Job</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.JobManager.html">JobManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.StatusCode.html">StatusCode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stepped_job.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.Watchdog.html">Watchdog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.Step.html">Step</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.SteppedJob.html">SteppedJob</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api/stepped_job.manager.html" title="next chapter">manager</a></li>
+      <li>Next: <a href="api/jobmgr.manager.html" title="next chapter">manager</a></li>
   </ul></li>
 </ul>
 </div>

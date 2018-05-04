@@ -1,0 +1,21 @@
+SteppedJob
+==========
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: SteppedJob
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~SteppedJob.start
+      ~SteppedJob.update_status
+      ~SteppedJob.wait
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: start
+   .. automethod:: update_status
+   .. automethod:: wait

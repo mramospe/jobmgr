@@ -1,0 +1,17 @@
+JobRegistry
+===========
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: JobRegistry
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~JobRegistry.register
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: register

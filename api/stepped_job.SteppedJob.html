@@ -1,0 +1,226 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SteppedJob &#8212; stepped_job 0.0.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Step" href="stepped_job.Step.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="steppedjob">
+<h1>SteppedJob<a class="headerlink" href="#steppedjob" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="stepped_job.SteppedJob">
+<em class="property">class </em><code class="descclassname">stepped_job.</code><code class="descname">SteppedJob</code><span class="sig-paren">(</span><em>path=None</em>, <em>registry=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#SteppedJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.SteppedJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">stepped_job.jobs.JobBase</span></code></p>
+<p>Instance to handle different steps, linked together. This object
+creates a new directory under “path” with a job ID. This job ID
+is expected to be a number, and the next to the greatest in the
+directory will be associated to the job (0 if none is found).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to the desired directory.</li>
+<li><strong>registry</strong> (<a class="reference internal" href="stepped_job.JobRegistry.html#stepped_job.JobRegistry" title="stepped_job.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="stepped_job.JobManager.html#stepped_job.JobManager" title="stepped_job.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a> instance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>steps</strong> – Steps managed by this job.</li>
+<li><strong>jid</strong> – Job ID, determined by the subdirectories in the output path.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.SteppedJob.add_step" title="stepped_job.SteppedJob.add_step"><code class="xref py py-obj docutils literal"><span class="pre">add_step</span></code></a>(name,&nbsp;executable,&nbsp;opts,&nbsp;data_regex)</td>
+<td>Add a new step to the job, concatenating it with the previous one.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#stepped_job.SteppedJob.start" title="stepped_job.SteppedJob.start"><code class="xref py py-obj docutils literal"><span class="pre">start</span></code></a>([first])</td>
+<td>Start the job from the given step ID.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#stepped_job.SteppedJob.status" title="stepped_job.SteppedJob.status"><code class="xref py py-obj docutils literal"><span class="pre">status</span></code></a>()</td>
+<td>Check and return the status of the job.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#stepped_job.SteppedJob.wait" title="stepped_job.SteppedJob.wait"><code class="xref py py-obj docutils literal"><span class="pre">wait</span></code></a>()</td>
+<td>Wait for the steps for completion.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="stepped_job.SteppedJob.add_step">
+<code class="descname">add_step</code><span class="sig-paren">(</span><em>name</em>, <em>executable</em>, <em>opts</em>, <em>data_regex</em>, <em>data_builder=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#SteppedJob.add_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.SteppedJob.add_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new step to the job, concatenating it with the previous one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – name of the step.</li>
+<li><strong>executable</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – application/version to run.</li>
+<li><strong>odir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – where to create the output directory.</li>
+<li><strong>data_regex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – regex representing the output data to send to the         next step.</li>
+<li><strong>data_builder</strong> (<em>function</em>) – function to define the way how the data is passed         to the executable. It must take a list of strings (paths to the data         files), and return a merged string. The default behaviour is to         return list to be executed as:         &lt;executable&gt; file1 file2 …         but one can also define the string so the argument is explicitely         specified, like:         &lt;executable&gt; –files file1 file2 …</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.6)"><strong>RuntimeError</strong></a> – if the name used for this step is already         being used in another step.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.SteppedJob.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>first=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#SteppedJob.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.SteppedJob.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the job from the given step ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>first</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – step ID to start processing.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.SteppedJob.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#SteppedJob.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.SteppedJob.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check and return the status of the job. This is the correct way of
+accessing the status of the job, since it updates it on
+request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">status of the job.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stepped_job.SteppedJob.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/stepped_job/jobs.html#SteppedJob.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stepped_job.SteppedJob.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for the steps for completion.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">stepped_job</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.manager.html">manager</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobRegistry.html">JobRegistry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.StatusCode.html">StatusCode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.JobBase.html">JobBase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.Job.html">Job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped_job.Step.html">Step</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SteppedJob</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="stepped_job.Step.html" title="previous chapter">Step</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/api/stepped_job.SteppedJob.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

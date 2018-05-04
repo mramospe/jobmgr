@@ -1,7 +1,7 @@
 Step
 ====
 
-.. currentmodule:: stepped_job
+.. currentmodule:: jobmgr
 
 .. autoclass:: Step
    :show-inheritance:
