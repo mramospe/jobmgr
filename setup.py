@@ -60,7 +60,7 @@ setup(
     scripts = ['scripts/{}'.format(f) for f in os.listdir('scripts')],
 
     # Requisites
-    install_requires = ['pytest'],
+    install_requires = ['ipython', 'pytest'],
 
     # Test requirements
     setup_requires = ['pytest-runner'],
