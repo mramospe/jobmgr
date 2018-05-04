@@ -23,7 +23,7 @@ except:
 
 # Local
 from . import utils
-from .core import JobManager, JobRegistry, StatusCode
+from .core import ContextManager, JobRegistry, StatusCode
 
 
 __all__ = ['JobBase', 'Job', 'Step', 'SteppedJob']
@@ -44,7 +44,9 @@ class JobBase(object):
         :param path: path to the desired directory.
         :type path: str
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`JobManager` instance.
+        object will be registered in the main :class:`ContextManager` instance.
+        Remember to close the :class:`ContextManager` class via
+        :func:`ContextManager.close` or setting your execution withing a context.
         :type registry: JobRegistry or None
 
         :ivar jid: Job ID, determined by the subdirectories in the output path.
@@ -64,7 +66,7 @@ class JobBase(object):
 
         # Register the object
         if registry is None:
-            registry = JobManager()
+            registry = ContextManager()
 
         self.jid = registry.register(self)
 
@@ -168,7 +170,9 @@ class Job(JobBase):
         default an event is constructed.
         :type kill_event: threading.Event
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`JobManager` instance.
+        object will be registered in the main :class:`ContextManager` instance.
+        Remember to close the :class:`ContextManager` class via
+        :func:`ContextManager.close` or setting your execution withing a context.
         :type registry: JobRegistry or None
 
         :ivar executable: Command to be executed.
@@ -290,7 +294,6 @@ class Job(JobBase):
         self._terminated_event.clear()
 
         self._task = threading.Thread(target=self._execute)
-        self._task.daemon = True
         self._task.start()
 
     def update_status( self ):
@@ -466,7 +469,9 @@ class SteppedJob(JobBase):
         :param path: path to the desired directory.
         :type path: str
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`JobManager` instance.
+        object will be registered in the main :class:`ContextManager` instance.
+        Remember to close the :class:`ContextManager` class via
+        :func:`ContextManager.close` or setting your execution withing a context.
         :type registry: JobRegistry or None
 
         :ivar steps: Steps managed by this job.

@@ -6,7 +6,6 @@ __author__  = ['Miguel Ramos Pernas']
 __email__   = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import atexit
 import logging
 import threading
 import time
@@ -17,7 +16,7 @@ try:
 except:
     import queue
 
-__all__ = ['JobManager', 'JobRegistry', 'manager', 'StatusCode', 'Watchdog']
+__all__ = ['ContextManager', 'JobRegistry', 'StatusCode', 'Watchdog']
 
 
 class JobRegistry(list):
@@ -85,23 +84,39 @@ class JobRegistry(list):
         return jid
 
 
-class JobManager(JobRegistry):
+class ContextManager(JobRegistry):
 
     __instance    = None
     __initialized = False
 
     def __init__( self ):
         '''
-        Singleton to hold and manage jobs.
-        If an attempt is made to create another object of this kind, the
-        same reference will be returned.
+        Singleton to represent a context to manage the jobs.
+        This object contains general jobs whose registries have not been
+        specified explicitely.
+        It can be used by two different ways:
+
+        - Context-like:
+
+        >>> with ContextManager() as jobs:
+        ...     pass
+        >>>
+
+        - As a file:
+
+        >>> jobs = ContextManager()
+        ... 'your code goes here...'
+        >>> jobs.close()
+
+        Calling :func:`ContextManager.close` is extremely necessary to prevent
+        a deadlock, since the monitoring thread would lock the session.
         '''
-        if JobManager.__initialized:
+        if ContextManager.__initialized:
             return
 
-        super(JobManager, self).__init__()
+        super(ContextManager, self).__init__()
 
-        JobManager.__initialized = True
+        ContextManager.__initialized = True
 
     def __new__( cls ):
         '''
@@ -112,15 +127,20 @@ class JobManager(JobRegistry):
         '''
         if cls.__initialized is False:
 
-            cls.__instance = super(JobManager, cls).__new__(cls)
+            cls.__instance = super(ContextManager, cls).__new__(cls)
 
         return cls.__instance
 
-    def __del__( self ):
+    def __enter__( self ):
         '''
-        Delete the JobManager. Prevent from creating zombie jobs, waiting for
-        completion if they are running, or killing them if the user causes a
-        KeyboardInterrupt exception to be raised.
+        Initialize the context.
+        '''
+        return self
+
+    def __exit__( self, *excinfo ):
+        '''
+        Wait for completion of the jobs.
+        If a KeyboardInterrupt is raised, it will kill the running jobs.
         '''
         if any(map(lambda j: j.status() == StatusCode.running, self)):
 
@@ -133,18 +153,15 @@ class JobManager(JobRegistry):
             except KeyboardInterrupt:
                 logging.getLogger(__name__).warning('Killing running jobs')
 
-        super(JobManager, self).__del__()
+        self.close()
 
-
-def manager():
-    '''
-    Return the JobManager instance. This is equivalent to attempt to build \
-    a new instance of :class:`JobManager`.
-
-    :returns: the instance to manage jobs.
-    :rtype: JobManager
-    '''
-    return JobManager()
+    def close( self ):
+        '''
+        Close the current context.
+        This must be called any time the instance of this class is created.
+        '''
+        self.watchdog.stop()
+        self.__del__()
 
 
 class StatusCode(object):
@@ -224,7 +241,6 @@ class Watchdog(object):
         '''
         if self._task is None:
             self._task = threading.Thread(target=self._watchdog)
-            self._task.daemon = True
             self._task.start()
 
     def stop( self ):

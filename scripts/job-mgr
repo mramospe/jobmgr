@@ -18,12 +18,8 @@ from traitlets.config.loader import Config
 # Local
 import jobmgr
 
-# Initialize the job manager
-jobs = jobmgr.JobManager()
-
-# Start IPython session
-cfg = Config()
-cfg.TerminalInteractiveShell.banner1 = '''
+# Display message
+message = '''
 Welcome to "jobmgr" version {}
 Access the job manager via "jobs"
 
@@ -34,7 +30,8 @@ For issues, questions and contributions, please visit:
 https://github.com/mramospe/jobmgr
 '''.format(jobmgr.version.__version__)
 
-avars = {'jobs': jobs}
+# Extract all the classes and functions from "jobmgr"
+avars = {}
 for n in jobmgr.__all__:
 
     a = getattr(jobmgr, n)
@@ -42,4 +39,14 @@ for n in jobmgr.__all__:
     if not inspect.ismodule(a):
         avars[n] = a
 
-IPython.start_ipython(config=cfg, user_ns=avars)
+# Initialize the context manager
+with jobmgr.ContextManager() as jobs:
+
+    # "jobs" will hold the ContextManager jobs
+    avars['jobs'] = jobs
+
+    # Start IPython session
+    cfg = Config()
+    cfg.TerminalInteractiveShell.banner1 = message
+
+    IPython.start_ipython(config=cfg, user_ns=avars)

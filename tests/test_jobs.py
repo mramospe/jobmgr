@@ -16,15 +16,17 @@ def test_job_base( tmpdir ):
     '''
     Test the behaviour of the JobBase instance.
     '''
-    path = tmpdir.join('test_job').strpath
+    path = tmpdir.join('test_job_base').strpath
 
-    j0 = jobmgr.JobBase(path)
+    with jobmgr.ContextManager() as jobs:
 
-    assert j0 in jobmgr.JobManager()
+        j0 = jobmgr.JobBase(path)
 
-    j1 = jobmgr.JobBase(path, registry=jobmgr.JobRegistry())
+        assert j0 in jobs
 
-    assert j1 not in jobmgr.JobManager()
+        j1 = jobmgr.JobBase(path, registry=jobmgr.JobRegistry())
+
+        assert j1 not in jobs
 
 
 def test_job_in_registry( tmpdir ):
@@ -33,25 +35,27 @@ def test_job_in_registry( tmpdir ):
     '''
     path = tmpdir.join('test_job_in_registry').strpath
 
-    # Test registered job
-    j0 = jobmgr.Job('python', ['-c', 'print("testing")'], path)
+    with jobmgr.ContextManager() as jobs:
 
-    assert j0 in jobmgr.JobManager()
+        # Test registered job
+        j0 = jobmgr.Job('python', ['-c', 'print("testing")'], path)
 
-    # Test job with a different registry
-    reg = jobmgr.JobRegistry()
+        assert j0 in jobs
 
-    j1 = jobmgr.Job('python', ['-c', 'print("testing")'], path, registry=reg)
+        # Test job with a different registry
+        reg = jobmgr.JobRegistry()
 
-    assert j1 not in jobmgr.JobManager()
-    assert j1 in reg
+        j1 = jobmgr.Job('python', ['-c', 'print("testing")'], path, registry=reg)
+
+        assert j1 not in jobs
+        assert j1 in reg
 
 
 def test_job_completion( tmpdir ):
     '''
     Test the behaviour of the Job instance.
     '''
-    path = tmpdir.join('test_job').strpath
+    path = tmpdir.join('test_job_completion').strpath
 
     reg = jobmgr.JobRegistry()
 
@@ -70,12 +74,12 @@ def test_job_completion( tmpdir ):
     assert j1.status() == jobmgr.StatusCode.killed
 
 
-def test_jobmgr_register( tmpdir ):
+def test_stepped_job_registry( tmpdir ):
     '''
     Test for the SteppedJob class. Checks between SteppedJob and JobRegistry
     instances.
     '''
-    path = tmpdir.join('test_jobmgr_in_registry').strpath
+    path = tmpdir.join('test_stepped_job_in_registry').strpath
 
     reg = jobmgr.JobRegistry()
 
@@ -89,11 +93,11 @@ def test_jobmgr_register( tmpdir ):
         jobmgr.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
 
 
-def test_jobmgr_run( tmpdir ):
+def test_stepped_job_run( tmpdir ):
     '''
     Test for the SteppedJob class. Completely run a job.
     '''
-    path = tmpdir.join('test_job').strpath
+    path = tmpdir.join('test_stepped_job_run').strpath
 
     reg = jobmgr.JobRegistry()
 
@@ -103,7 +107,7 @@ def test_jobmgr_run( tmpdir ):
 
     opts_create = [
         '-c',
-        'with open("dummy.txt", "wt") as f: f.write("testing\\n")'
+        'with open("dummy.txt", "wt") as f: f.write("testing")'
         ]
 
     jobmgr.Step('create', executable, opts_create, job, data_regex='.*txt')
@@ -123,11 +127,11 @@ def test_jobmgr_run( tmpdir ):
     assert job.status() == jobmgr.core.StatusCode.terminated
 
 
-def test_jobmgr_steps( tmpdir ):
+def test_stepped_job_steps( tmpdir ):
     '''
     Test for the SteppedJob class. If one step fails, it should kill the rest.
     '''
-    path = tmpdir.join('test_jobmgr_steps').strpath
+    path = tmpdir.join('test_stepped_job_steps').strpath
 
     reg = jobmgr.JobRegistry()
 
@@ -150,12 +154,12 @@ def test_jobmgr_steps( tmpdir ):
                    job.steps))
 
 
-def test_jobmgr_kill( tmpdir ):
+def test_stepped_job_kill( tmpdir ):
     '''
     Test for the SteppedJob class. If one step is killed, it should kill the
     rest.
     '''
-    path = tmpdir.join('test_jobmgr_steps').strpath
+    path = tmpdir.join('test_stepped_job_kill').strpath
 
     reg = jobmgr.JobRegistry()
 
@@ -165,7 +169,7 @@ def test_jobmgr_kill( tmpdir ):
 
     opts_create = [
         '-c',
-        'open("dummy.txt", "wt").write("testing\\n"); while True: pass'
+        'while True: pass; open("dummy.txt", "wt").write("testing")'
         ]
     jobmgr.Step('create', executable, opts_create, job, data_regex='.*txt')
 

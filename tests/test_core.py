@@ -21,23 +21,19 @@ def test_job_registry():
 
     assert j0 is not j1
 
-def test_job_manager():
-    '''
-    Tests for the JobManager instance
-    '''
-    # Test singleton behaviour
-    assert jobmgr.JobManager() is jobmgr.JobManager()
 
-    # Very important to test that the JobManager imported from the top
-    # module and that from "core" are the same.
-    assert jobmgr.JobManager() is jobmgr.core.JobManager()
-
-
-def test_manager():
+def test_context_manager():
     '''
-    Test the function to get the job manager.
+    Tests for the ContextManager instance
     '''
-    assert jobmgr.manager() is jobmgr.JobManager()
+    with jobmgr.core.ContextManager() as cmgr:
+
+        # Test singleton behaviour
+        assert cmgr is jobmgr.core.ContextManager()
+
+        # Very important to test that the JobManager imported from the top
+        # module and that from "core" are the same.
+        assert jobmgr.ContextManager() is jobmgr.core.ContextManager()
 
 
 def test_watchdog( tmpdir ):
