@@ -326,17 +326,14 @@ class Step(Job):
         '''
         Represent a step on a generation process.
 
-        :param name: name of the step. It must be unique within a job.
+        :param name: name of the step.
         :type name: str
         :param executable: application/version to run.
         :type executable: str
         :param opts: options to be passed to the executable.
         :type opts: list(str)
-        :param parent: parent job.
+        :param parent: parent job, inheriting from :class:`SteppedJob`.
         :type parent: SteppedJob
-        :param kill_event: event associated to a possible "kill" signal, to \
-        be propagated among all the steps.
-        :type kill_event: threading.Event
         :param data_regex: regex representing the output data to send to the \
         next step.
         :type data_regex: str
@@ -349,6 +346,8 @@ class Step(Job):
         specified, like: \
         <executable> --files file1 file2 ...
         :type data_builder: function
+        :raises RuntimeError: if the name used for this step is already \
+        being used in another step.
 
         :ivar executable: Command to be executed. Input data is added when the \
         process just before execution (once it is defined).
@@ -357,6 +356,10 @@ class Step(Job):
         to the executable.
         :ivar jid: Job ID, determined by the subdirectories in the output path.
         '''
+        if any(map(lambda s: s.name == name, parent.steps)):
+            raise RuntimeError('Unable to create step "{}"; another '\
+                               'with the same name already exists'.format(name))
+
         # Set the previous step queue. Need to do this before the object
         # is registered
         if len(parent.steps):
@@ -490,39 +493,6 @@ class SteppedJob(JobBase):
         :rtype: str
         '''
         return 'Job {} with steps:\n'.format(self.jid) + '\n'.join(map(str, self.steps))
-
-    def add_step( self, name, executable, opts, data_regex, data_builder = None ):
-        '''
-        Add a new step to the job, concatenating it with the previous one.
-
-        :param name: name of the step.
-        :type name: str
-        :param executable: application/version to run.
-        :type executable: str
-        :param data_regex: regex representing the output data to send to the \
-        next step.
-        :type data_regex: str
-        :param data_builder: function to define the way how the data is passed \
-        to the executable. It must take a list of strings (paths to the data \
-        files), and return a merged string. The default behaviour is to \
-        return list to be executed as: \
-        <executable> file1 file2 ... \
-        but one can also define the string so the argument is explicitely \
-        specified, like: \
-        <executable> --files file1 file2 ...
-        :type data_builder: function
-        :raises RuntimeError: if the name used for this step is already \
-        being used in another step.
-        '''
-        if any(map(lambda s: s.name == name, self.steps)):
-            raise RuntimeError('Unable to create step "{}"; another '\
-                                   'with the same name already exists')
-
-        # The step is automatically registered, no need to append it to
-        # the inner registry.
-        step = Step(name, executable, opts, self,
-                    data_regex=data_regex,
-                    data_builder=data_builder)
 
     def start( self, first = 0 ):
         '''

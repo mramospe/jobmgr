@@ -83,10 +83,10 @@ def test_stepped_job_register( tmpdir ):
 
     assert job in reg
 
-    job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
+    stepped_job.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
 
     with pytest.raises(RuntimeError):
-        job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
+        stepped_job.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
 
 
 def test_stepped_job_run( tmpdir ):
@@ -106,14 +106,14 @@ def test_stepped_job_run( tmpdir ):
         'with open("dummy.txt", "wt") as f: f.write("testing\\n")'
         ]
 
-    job.add_step('create', executable, opts_create, data_regex='.*txt')
+    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = [
         '-c',
         'import sys; f = open(sys.argv[1]); print(f.read())'
         ]
 
-    job.add_step('consume', executable, opts_consume, data_regex='.*txt')
+    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.wait()
@@ -136,10 +136,10 @@ def test_stepped_job_steps( tmpdir ):
     executable = 'python'
 
     opts_create = ['-c', 'cause error']
-    job.add_step('create', executable, opts_create, data_regex='.*txt')
+    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = ['-c', 'print("should run fine")']
-    job.add_step('consume', executable, opts_consume, data_regex='.*txt')
+    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.wait()
@@ -167,13 +167,13 @@ def test_stepped_job_kill( tmpdir ):
         '-c',
         'open("dummy.txt", "wt").write("testing\\n"); while True: pass'
         ]
-    job.add_step('create', executable, opts_create, data_regex='.*txt')
+    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = [
         '-c',
         'import sys; f = open(sys.argv[1]); print(f.read())'
         ]
-    job.add_step('consume', executable, opts_consume, data_regex='.*txt')
+    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.kill()
