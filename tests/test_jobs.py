@@ -27,55 +27,77 @@ def test_job_base( tmpdir ):
     assert j1 not in stepped_job.JobManager()
 
 
-def test_job( tmpdir ):
+def test_job_in_registry( tmpdir ):
     '''
     Test the behaviour of the Job instance.
     '''
-    path = tmpdir.join('test_job').strpath
+    path = tmpdir.join('test_job_in_registry').strpath
 
     # Test registered job
     j0 = stepped_job.Job('python', ['-c', 'print("testing")'], path)
 
     assert j0 in stepped_job.JobManager()
 
-    j0.start()
-
     # Test job with a different registry
-    j1 = stepped_job.Job('python', ['-c', 'print("testing")'], path, registry=stepped_job.JobRegistry())
+    reg = stepped_job.JobRegistry()
+
+    j1 = stepped_job.Job('python', ['-c', 'print("testing")'], path, registry=reg)
 
     assert j1 not in stepped_job.JobManager()
-
-    j1.start()
-
-    # Wait for completion
-    for j in (j0, j1):
-        j.wait()
-        assert j.status() == stepped_job.StatusCode.terminated
-
-    # Test killing a job
-    j2 = stepped_job.Job('python', ['-c', 'while True: pass'], path)
-    j2.start()
-    j2.kill()
-
-    assert j2.status() == stepped_job.StatusCode.killed
+    assert j1 in reg
 
 
-def test_stepped_job( tmpdir ):
+def test_job_completion( tmpdir ):
     '''
-    Test the behaviour of the SteppedJob instance.
+    Test the behaviour of the Job instance.
     '''
     path = tmpdir.join('test_job').strpath
 
-    # Raise error if two steps have the same name
-    job = stepped_job.SteppedJob(path)
+    reg = stepped_job.JobRegistry()
+
+    j0 = stepped_job.Job('python', ['-c', 'print("testing")'], path, registry=reg)
+    j1 = stepped_job.Job('python', ['-c', 'while True: pass'], path, registry=reg)
+
+    for j in (j0, j1):
+        j.start()
+
+    j0.wait()
+    j1.kill()
+
+    reg.watchdog.stop()
+
+    assert j0.status() == stepped_job.StatusCode.terminated
+    assert j1.status() == stepped_job.StatusCode.killed
+
+
+def test_stepped_job_register( tmpdir ):
+    '''
+    Test for the SteppedJob class. Checks between SteppedJob and JobRegistry
+    instances.
+    '''
+    path = tmpdir.join('test_stepped_job_in_registry').strpath
+
+    reg = stepped_job.JobRegistry()
+
+    job = stepped_job.SteppedJob(path, registry=reg)
+
+    assert job in reg
 
     job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
 
     with pytest.raises(RuntimeError):
         job.add_step('fail', 'python', ['-c', 'print()'], data_regex='.*txt')
 
-    # Create a job and run it
-    job = stepped_job.SteppedJob(path)
+
+def test_stepped_job_run( tmpdir ):
+    '''
+    Test for the SteppedJob class. Completely run a job.
+    '''
+    path = tmpdir.join('test_job').strpath
+
+    reg = stepped_job.JobRegistry()
+
+    job = stepped_job.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
@@ -94,38 +116,50 @@ def test_stepped_job( tmpdir ):
     job.add_step('consume', executable, opts_consume, data_regex='.*txt')
 
     job.start()
-
     job.wait()
+    job.steps.watchdog.stop()
+    reg.watchdog.stop()
 
     assert job.status() == stepped_job.core.StatusCode.terminated
 
-    # If one step fails, it should kill the rest
-    job = stepped_job.SteppedJob(path)
+
+def test_stepped_job_steps( tmpdir ):
+    '''
+    Test for the SteppedJob class. If one step fails, it should kill the rest.
+    '''
+    path = tmpdir.join('test_stepped_job_steps').strpath
+
+    reg = stepped_job.JobRegistry()
+
+    job = stepped_job.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
     opts_create = ['-c', 'cause error']
-
     job.add_step('create', executable, opts_create, data_regex='.*txt')
 
     opts_consume = ['-c', 'print("should run fine")']
-
     job.add_step('consume', executable, opts_consume, data_regex='.*txt')
 
     job.start()
-
     job.wait()
-
-    for s in job.steps:
-        print(s.status())
+    job.steps.watchdog.stop()
+    reg.watchdog.stop()
 
     assert all(map(lambda s: s.status() == stepped_job.core.StatusCode.killed,
                    job.steps))
 
-    assert job.status() == stepped_job.core.StatusCode.killed
 
-    # Test killing a job
-    job = stepped_job.SteppedJob(path)
+def test_stepped_job_kill( tmpdir ):
+    '''
+    Test for the SteppedJob class. If one step is killed, it should kill the
+    rest.
+    '''
+    path = tmpdir.join('test_stepped_job_steps').strpath
+
+    reg = stepped_job.JobRegistry()
+
+    job = stepped_job.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
@@ -133,18 +167,17 @@ def test_stepped_job( tmpdir ):
         '-c',
         'open("dummy.txt", "wt").write("testing\\n"); while True: pass'
         ]
-
     job.add_step('create', executable, opts_create, data_regex='.*txt')
 
     opts_consume = [
         '-c',
         'import sys; f = open(sys.argv[1]); print(f.read())'
         ]
-
     job.add_step('consume', executable, opts_consume, data_regex='.*txt')
 
     job.start()
-
     job.kill()
+    job.steps.watchdog.stop()
+    reg.watchdog.stop()
 
     assert job.status() == stepped_job.core.StatusCode.killed

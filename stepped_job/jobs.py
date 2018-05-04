@@ -122,12 +122,19 @@ class JobBase(object):
         self._kill_event.set()
         self.wait()
 
+    def update_status( self ):
+        '''
+        Update the status of the job.
+
+        .. warning::
+           This method is reserved to be used by the class :class:`Watchdog`.
+           Using it on your own might cause undefined behaviour.
+        '''
+        pass
+
     def status( self ):
         '''
         Return the status of this job.
-        This is the correct way of accessing the status of the job, since it
-        updates it on request.
-        This method is not implemented in this class.
 
         :returns: status of this job.
         :rtype: int
@@ -305,14 +312,13 @@ class Job(JobBase):
         self._task.daemon = True
         self._task.start()
 
-    def status( self ):
+    def update_status( self ):
         '''
-        Return the status of this job. This is the correct way of
-        accessing the status of the job, since it updates it on
-        request.
+        Update the status of the job.
 
-        :returns: status of this job.
-        :rtype: int
+        .. warning::
+           This method is reserved to be used by the class :class:`Watchdog`.
+           Using it on your own might cause undefined behaviour.
         '''
         if self._terminated_event.is_set():
 
@@ -322,8 +328,6 @@ class Job(JobBase):
             if not self._task.is_alive():
                 if self._kill_event.is_set():
                     self._status = StatusCode.killed
-
-        return self._status
 
     def wait( self ):
         '''
@@ -517,7 +521,7 @@ class SteppedJob(JobBase):
         '''
         self.kill()
 
-        for s in self.steps():
+        for s in self.steps:
             s.wait()
 
     def __str__( self ):
@@ -606,14 +610,13 @@ class SteppedJob(JobBase):
         for s in self.steps[i:]:
             s.start()
 
-    def status( self ):
+    def update_status( self ):
         '''
-        Check and return the status of the job. This is the correct way of
-        accessing the status of the job, since it updates it on
-        request
+        Update the status of the job.
 
-        :returns: status of the job.
-        :rtype: str
+        .. warning::
+           This method is reserved to be used by the class :class:`Watchdog`.
+           Using it on your own might cause undefined behaviour.
         '''
         if self._status not in (StatusCode.terminated, StatusCode.killed):
 
@@ -629,8 +632,6 @@ class SteppedJob(JobBase):
                     'Job {} has been killed'.format(self.jid))
 
                 self._status = StatusCode.killed
-
-        return self._status
 
     def wait( self ):
         '''

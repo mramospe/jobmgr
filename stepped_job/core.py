@@ -185,8 +185,7 @@ class Watchdog(object):
         '''
         Terminate watching the jobs and free the queue.
         '''
-        self._stop_event.set()
-        self._task.join()
+        self.stop()
 
         while not self._job_queue.empty():
             self._job_queue.get()
@@ -198,7 +197,7 @@ class Watchdog(object):
         jlst = []
         while not self._job_queue.empty():
             j = self._job_queue.get()
-            j.status()
+            j.update_status()
 
             jlst.append(j)
 
