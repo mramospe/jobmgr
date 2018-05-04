@@ -1,12 +1,12 @@
-===========
-stepped_job
-===========
+======
+jobmgr
+======
 
-.. image:: https://img.shields.io/travis/mramospe/stepped_job.svg
-   :target: https://travis-ci.org/mramospe/stepped_job
+.. image:: https://img.shields.io/travis/mramospe/jobmgr.svg
+   :target: https://travis-ci.org/mramospe/jobmgr
 
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
-   :target: https://mramospe.github.io/stepped_job/
+   :target: https://mramospe.github.io/jobmgr/
 
 .. inclusion-marker-do-not-remove
 
@@ -26,5 +26,5 @@ To use this package, clone the repository and install with `pip`:
 
 .. code-block:: bash
 
-   git clone https://github.com/mramospe/stepped_job.git
-   pip install stepped_job
+   git clone https://github.com/mramospe/jobmgr.git
+   pip install jobmgr

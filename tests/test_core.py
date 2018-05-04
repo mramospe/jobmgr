@@ -6,18 +6,18 @@ __author__  = ['Miguel Ramos Pernas']
 __email__   = ['miguel.ramos.pernas@cern.ch']
 
 # Local
-import stepped_job
+import jobmgr
 
 
 def test_job_registry():
     '''
     Tests for the JobRegistry instance
     '''
-    j0 = stepped_job.JobRegistry()
+    j0 = jobmgr.JobRegistry()
 
     assert j0 is j0
 
-    j1 = stepped_job.JobRegistry()
+    j1 = jobmgr.JobRegistry()
 
     assert j0 is not j1
 
@@ -26,18 +26,18 @@ def test_job_manager():
     Tests for the JobManager instance
     '''
     # Test singleton behaviour
-    assert stepped_job.JobManager() is stepped_job.JobManager()
+    assert jobmgr.JobManager() is jobmgr.JobManager()
 
     # Very important to test that the JobManager imported from the top
     # module and that from "core" are the same.
-    assert stepped_job.JobManager() is stepped_job.core.JobManager()
+    assert jobmgr.JobManager() is jobmgr.core.JobManager()
 
 
 def test_manager():
     '''
     Test the function to get the job manager.
     '''
-    assert stepped_job.manager() is stepped_job.JobManager()
+    assert jobmgr.manager() is jobmgr.JobManager()
 
 
 def test_watchdog( tmpdir ):
@@ -48,11 +48,11 @@ def test_watchdog( tmpdir ):
 
     cmd = ['-c', 'import time; time.sleep(0.3)']
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    j0 = stepped_job.Job('python', cmd, path, registry=reg)
-    j1 = stepped_job.Job('python', cmd, path, registry=reg)
-    j2 = stepped_job.Job('python', cmd, path, registry=reg)
+    j0 = jobmgr.Job('python', cmd, path, registry=reg)
+    j1 = jobmgr.Job('python', cmd, path, registry=reg)
+    j2 = jobmgr.Job('python', cmd, path, registry=reg)
 
     jobs = (j0, j1, j2)
 
@@ -68,5 +68,5 @@ def test_watchdog( tmpdir ):
     reg.watchdog.stop()
 
     assert all(
-        map(lambda j: j._status == stepped_job.StatusCode.terminated,jobs)
+        map(lambda j: j._status == jobmgr.StatusCode.terminated,jobs)
         )

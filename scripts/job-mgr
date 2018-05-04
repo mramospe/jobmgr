@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 Script to initialize an IPython session with all the classes and functions from
-"stepped_job" being loaded.
+"jobmgr" being loaded.
 '''
 
 # Python
@@ -16,28 +16,28 @@ except:
 from traitlets.config.loader import Config
 
 # Local
-import stepped_job
+import jobmgr
 
 # Initialize the job manager
-jobs = stepped_job.JobManager()
+jobs = jobmgr.JobManager()
 
 # Start IPython session
 cfg = Config()
 cfg.TerminalInteractiveShell.banner1 = '''
-Welcome to "stepped_job" version {}
+Welcome to "jobmgr" version {}
 Access the job manager via "jobs"
 
 Documentation is available at:
-https://mramospe.github.io/stepped_job/
+https://mramospe.github.io/jobmgr/
 
 For issues, questions and contributions, please visit:
-https://github.com/mramospe/stepped_job
-'''.format(stepped_job.version.__version__)
+https://github.com/mramospe/jobmgr
+'''.format(jobmgr.version.__version__)
 
 avars = {'jobs': jobs}
-for n in stepped_job.__all__:
+for n in jobmgr.__all__:
 
-    a = getattr(stepped_job, n)
+    a = getattr(jobmgr, n)
 
     if not inspect.ismodule(a):
         avars[n] = a

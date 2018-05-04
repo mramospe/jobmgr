@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Setup script for the stepped_job package
+Setup script for the "jobmgr" package
 '''
 
 __author__ = 'Miguel Ramos Pernas'
@@ -40,7 +40,7 @@ version = frmt.format('.'.join(map(str, version_info[:3])), version_info[4])
 # Setup function
 setup(
 
-    name = 'stepped_job',
+    name = 'jobmgr',
 
     version = version,
 
@@ -70,10 +70,10 @@ setup(
 
 
 # Create a module with the versions
-version_file = open('stepped_job/version.py', 'wt')
+version_file = open('jobmgr/version.py', 'wt')
 version_file.write("""\
 '''
-Auto-generated module holding the version of the stepped_job package
+Auto-generated module holding the version of the "jobmgr" package
 '''
 
 __version__ = "{}"

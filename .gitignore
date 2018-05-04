@@ -53,8 +53,8 @@ Thumbs.db
 # PIP installation files #
 ##########################
 .eggs/
-stepped_job.egg-info/
-stepped_job/version.py
+jobmgr.egg-info/
+jobmgr/version.py
 
 # Other files #
 ###############

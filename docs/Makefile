@@ -4,9 +4,9 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = stepped_job
+SPHINXPROJ    = jobmgr
 SOURCEDIR     = source
-BUILDDIR      = ../../stepped_job-docs
+BUILDDIR      = ../../jobmgr-docs
 GITCOMMANDS   = cd $(BUILDDIR)/html; git add . ; git commit -m 'Rebuilt docs' ; git push origin gh-pages
 
 # Put it first so that "make" without argument is like "make help".

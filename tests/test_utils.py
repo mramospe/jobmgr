@@ -9,7 +9,7 @@ __email__   = ['miguel.ramos.pernas@cern.ch']
 import os
 
 # Local
-import stepped_job
+import jobmgr
 
 
 def test_create_dir( tmpdir ):
@@ -19,14 +19,14 @@ def test_create_dir( tmpdir ):
     # Create another directory
     path = tmpdir.join('dummy').strpath
 
-    stepped_job.utils.create_dir(path)
+    jobmgr.utils.create_dir(path)
 
     assert os.path.exists(path)
 
     # Check that, if called many times, the directories have different
     # numbers.
     for i in range(3):
-        stepped_job.utils.create_dir(path)
+        jobmgr.utils.create_dir(path)
     assert list(sorted(map(int, os.listdir(path)))) == list(range(4))
 
 
@@ -41,7 +41,7 @@ def test_merge_dicts():
 
     res = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}
 
-    assert set(stepped_job.utils.merge_dicts(a, b, c).items()) == set(res.items())
+    assert set(jobmgr.utils.merge_dicts(a, b, c).items()) == set(res.items())
 
     # Test that it overwrites values
     a = {'a': 1, 'b': 2}
@@ -50,4 +50,4 @@ def test_merge_dicts():
 
     res = {'a': 3, 'b': 3, 'c': 4, 'd': 4}
 
-    assert set(stepped_job.utils.merge_dicts(a, b, c).items()) == set(res.items())
+    assert set(jobmgr.utils.merge_dicts(a, b, c).items()) == set(res.items())

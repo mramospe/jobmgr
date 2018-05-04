@@ -9,7 +9,7 @@ __email__   = ['miguel.ramos.pernas@cern.ch']
 import pytest
 
 # Local
-import stepped_job
+import jobmgr
 
 
 def test_job_base( tmpdir ):
@@ -18,13 +18,13 @@ def test_job_base( tmpdir ):
     '''
     path = tmpdir.join('test_job').strpath
 
-    j0 = stepped_job.JobBase(path)
+    j0 = jobmgr.JobBase(path)
 
-    assert j0 in stepped_job.JobManager()
+    assert j0 in jobmgr.JobManager()
 
-    j1 = stepped_job.JobBase(path, registry=stepped_job.JobRegistry())
+    j1 = jobmgr.JobBase(path, registry=jobmgr.JobRegistry())
 
-    assert j1 not in stepped_job.JobManager()
+    assert j1 not in jobmgr.JobManager()
 
 
 def test_job_in_registry( tmpdir ):
@@ -34,16 +34,16 @@ def test_job_in_registry( tmpdir ):
     path = tmpdir.join('test_job_in_registry').strpath
 
     # Test registered job
-    j0 = stepped_job.Job('python', ['-c', 'print("testing")'], path)
+    j0 = jobmgr.Job('python', ['-c', 'print("testing")'], path)
 
-    assert j0 in stepped_job.JobManager()
+    assert j0 in jobmgr.JobManager()
 
     # Test job with a different registry
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    j1 = stepped_job.Job('python', ['-c', 'print("testing")'], path, registry=reg)
+    j1 = jobmgr.Job('python', ['-c', 'print("testing")'], path, registry=reg)
 
-    assert j1 not in stepped_job.JobManager()
+    assert j1 not in jobmgr.JobManager()
     assert j1 in reg
 
 
@@ -53,10 +53,10 @@ def test_job_completion( tmpdir ):
     '''
     path = tmpdir.join('test_job').strpath
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    j0 = stepped_job.Job('python', ['-c', 'print("testing")'], path, registry=reg)
-    j1 = stepped_job.Job('python', ['-c', 'while True: pass'], path, registry=reg)
+    j0 = jobmgr.Job('python', ['-c', 'print("testing")'], path, registry=reg)
+    j1 = jobmgr.Job('python', ['-c', 'while True: pass'], path, registry=reg)
 
     for j in (j0, j1):
         j.start()
@@ -66,38 +66,38 @@ def test_job_completion( tmpdir ):
 
     reg.watchdog.stop()
 
-    assert j0.status() == stepped_job.StatusCode.terminated
-    assert j1.status() == stepped_job.StatusCode.killed
+    assert j0.status() == jobmgr.StatusCode.terminated
+    assert j1.status() == jobmgr.StatusCode.killed
 
 
-def test_stepped_job_register( tmpdir ):
+def test_jobmgr_register( tmpdir ):
     '''
     Test for the SteppedJob class. Checks between SteppedJob and JobRegistry
     instances.
     '''
-    path = tmpdir.join('test_stepped_job_in_registry').strpath
+    path = tmpdir.join('test_jobmgr_in_registry').strpath
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    job = stepped_job.SteppedJob(path, registry=reg)
+    job = jobmgr.SteppedJob(path, registry=reg)
 
     assert job in reg
 
-    stepped_job.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
+    jobmgr.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
 
     with pytest.raises(RuntimeError):
-        stepped_job.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
+        jobmgr.Step('fail', 'python', ['-c', 'print()'], job, data_regex='.*txt')
 
 
-def test_stepped_job_run( tmpdir ):
+def test_jobmgr_run( tmpdir ):
     '''
     Test for the SteppedJob class. Completely run a job.
     '''
     path = tmpdir.join('test_job').strpath
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    job = stepped_job.SteppedJob(path, registry=reg)
+    job = jobmgr.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
@@ -106,60 +106,60 @@ def test_stepped_job_run( tmpdir ):
         'with open("dummy.txt", "wt") as f: f.write("testing\\n")'
         ]
 
-    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
+    jobmgr.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = [
         '-c',
         'import sys; f = open(sys.argv[1]); print(f.read())'
         ]
 
-    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
+    jobmgr.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.wait()
     job.steps.watchdog.stop()
     reg.watchdog.stop()
 
-    assert job.status() == stepped_job.core.StatusCode.terminated
+    assert job.status() == jobmgr.core.StatusCode.terminated
 
 
-def test_stepped_job_steps( tmpdir ):
+def test_jobmgr_steps( tmpdir ):
     '''
     Test for the SteppedJob class. If one step fails, it should kill the rest.
     '''
-    path = tmpdir.join('test_stepped_job_steps').strpath
+    path = tmpdir.join('test_jobmgr_steps').strpath
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    job = stepped_job.SteppedJob(path, registry=reg)
+    job = jobmgr.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
     opts_create = ['-c', 'cause error']
-    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
+    jobmgr.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = ['-c', 'print("should run fine")']
-    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
+    jobmgr.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.wait()
     job.steps.watchdog.stop()
     reg.watchdog.stop()
 
-    assert all(map(lambda s: s.status() == stepped_job.core.StatusCode.killed,
+    assert all(map(lambda s: s.status() == jobmgr.core.StatusCode.killed,
                    job.steps))
 
 
-def test_stepped_job_kill( tmpdir ):
+def test_jobmgr_kill( tmpdir ):
     '''
     Test for the SteppedJob class. If one step is killed, it should kill the
     rest.
     '''
-    path = tmpdir.join('test_stepped_job_steps').strpath
+    path = tmpdir.join('test_jobmgr_steps').strpath
 
-    reg = stepped_job.JobRegistry()
+    reg = jobmgr.JobRegistry()
 
-    job = stepped_job.SteppedJob(path, registry=reg)
+    job = jobmgr.SteppedJob(path, registry=reg)
 
     executable = 'python'
 
@@ -167,17 +167,17 @@ def test_stepped_job_kill( tmpdir ):
         '-c',
         'open("dummy.txt", "wt").write("testing\\n"); while True: pass'
         ]
-    stepped_job.Step('create', executable, opts_create, job, data_regex='.*txt')
+    jobmgr.Step('create', executable, opts_create, job, data_regex='.*txt')
 
     opts_consume = [
         '-c',
         'import sys; f = open(sys.argv[1]); print(f.read())'
         ]
-    stepped_job.Step('consume', executable, opts_consume, job, data_regex='.*txt')
+    jobmgr.Step('consume', executable, opts_consume, job, data_regex='.*txt')
 
     job.start()
     job.kill()
     job.steps.watchdog.stop()
     reg.watchdog.stop()
 
-    assert job.status() == stepped_job.core.StatusCode.killed
+    assert job.status() == jobmgr.core.StatusCode.killed
