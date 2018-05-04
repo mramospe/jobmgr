@@ -8,3 +8,4 @@ install:
 # Command to run tests
 script:
   - pytest tests
+  - job-mgr -c "print('testing')"
