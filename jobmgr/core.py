@@ -169,9 +169,9 @@ class Watchdog(object):
     def __init__( self ):
         '''
         Object to iterate over a set of jobs and update its status.
-        The objects are passed throguh the :method:`Watchdog.watch` method.
+        The objects are passed throguh the :func:`Watchdog.watch` method.
         To be thread-safe, one must ensure to do not delete the jobs before
-        terminating the watchdog (through :method:`Watchdog.terminate`).
+        stopping the watchdog monitoring (through :func:`Watchdog.stop`).
         '''
         super(Watchdog, self).__init__()
 
