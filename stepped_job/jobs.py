@@ -184,35 +184,16 @@ class Job(JobBase):
         # To hold the task
         self._task = None
 
-    def _create_thread( self ):
-        '''
-        Create a new thread for this job.
-
-        :returns: new thread for this job.
-        :rtype: threading.Thread
-        '''
-        return threading.Thread(target=self._execute,
-                                args=(self._kill_event,
-                                      self._terminated_event,)
-                                      )
-
-    def _execute( self, kill_event, terminated_event ):
+    def _execute( self ):
         '''
         Function to be sent to a new thread, and execute the step process.
-
-        :param kill_event: event associated to a possible "kill" signal, to \
-        be propagated among all the steps.
-        :type kill_event: threading.Event
-        :param terminated_event: event associated to the termination status \
-        of the step.
-        :type terminated_event: threading.Event
         '''
-        self._run_process(kill_event)
+        self._run_process()
 
-        if not kill_event.is_set():
-            terminated_event.set()
+        if not self._kill_event.is_set():
+            self._terminated_event.set()
 
-    def _run_process( self, kill_event, extra_opts = None ):
+    def _run_process( self, extra_opts = None ):
         '''
         Create and run the process associated to this job.
         '''
@@ -244,7 +225,7 @@ class Job(JobBase):
 
         # Check whether the thread is asked to be killed
         while proc.poll() == None:
-            if kill_event.is_set():
+            if self._kill_event.is_set():
 
                 # Kill the running process
                 logging.getLogger(__name__).warning(
@@ -260,7 +241,7 @@ class Job(JobBase):
             logging.getLogger(__name__).error(
                 'Job "{}" has failed; see output in {}'.format(self.full_jid(), self._odir))
 
-            kill_event.set()
+            self._kill_event.set()
 
     def peek( self, name = 'stdout', editor = None ):
         '''
@@ -308,7 +289,7 @@ class Job(JobBase):
         self._kill_event.clear()
         self._terminated_event.clear()
 
-        self._task = self._create_thread()
+        self._task = threading.Thread(target=self._execute)
         self._task.daemon = True
         self._task.start()
 
@@ -402,37 +383,14 @@ class Step(Job):
 
         self.data_regex = data_regex
 
-    def _create_thread( self ):
-        '''
-        Create a new thread for this job.
-
-        :returns: new thread for this job.
-        :rtype: threading.Thread
-        '''
-        return threading.Thread(target=self._execute,
-                                args=(self._prev_queue,
-                                      self._queue,
-                                      self._kill_event,
-                                      self._terminated_event,)
-                                      )
-
-    def _execute( self, prev_queue, out_queue, kill_event, terminated_event ):
+    def _execute( self ):
         '''
         Function to be sent to a new thread, and execute the step process.
-
-        :param kill_event: event associated to a possible "kill" signal, to \
-        be propagated among all the steps.
-        :type kill_event: threading.Event
-        :param terminated_event: event associated to the termination status \
-        of the step.
-        :type terminated_event: threading.Event
         '''
-        import logging
-
-        if prev_queue is not None:
+        if self._prev_queue is not None:
             # Get data from previous queue if it exists, and prepare input
 
-            data = prev_queue.get()
+            data = self._prev_queue.get()
 
             extra_opts = self.data_builder(data).split()
         else:
@@ -442,21 +400,21 @@ class Step(Job):
 
             extra_opts = []
 
-        if not kill_event.is_set():
-            self._run_process(kill_event, extra_opts)
+        if not self._kill_event.is_set():
+            self._run_process(extra_opts)
 
-        if kill_event.is_set():
+        if self._kill_event.is_set():
             # This message is displayed if this step is asked to be killed
             # or if the signal comes from other step. The "kill" signal is
             # propagated by including "None" as data to the next step.
             logging.getLogger(__name__).warning(
                 'Step "{}" has been killed'.format(self.name))
 
-            out_queue.put(None)
+            self._queue.put(None)
         else:
             # Notify the previous queue that we have finished
-            if prev_queue is not None:
-                prev_queue.task_done()
+            if self._prev_queue is not None:
+                self._prev_queue.task_done()
 
             dr = re.compile(self.data_regex)
 
@@ -466,12 +424,12 @@ class Step(Job):
 
             output = [os.path.join(self._odir, m.string) for m in matches]
 
-            out_queue.put(output)
+            self._queue.put(output)
 
             self._terminated_event.set()
 
-        if prev_queue is not None:
-            prev_queue.put(data)
+        if self._prev_queue is not None:
+            self._prev_queue.put(data)
 
     def clear_input_data( self ):
         '''
@@ -541,8 +499,6 @@ class SteppedJob(JobBase):
         :type name: str
         :param executable: application/version to run.
         :type executable: str
-        :param odir: where to create the output directory.
-        :type odir: str
         :param data_regex: regex representing the output data to send to the \
         next step.
         :type data_regex: str
