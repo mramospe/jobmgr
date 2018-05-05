@@ -58,7 +58,7 @@
 <li><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>)</em>) – options to be passed to the executable.</li>
 <li><strong>odir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – where to create the output directory.</li>
 <li><strong>kill_event</strong> (<a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.Event" title="(in Python v3.6)"><em>threading.Event</em></a>) – event associated to a possible “kill” signal. By         default an event is constructed.</li>
-<li><strong>registry</strong> (<a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-class docutils literal"><span class="pre">JobManager</span></code></a> instance.</li>
+<li><strong>registry</strong> (<a class="reference internal" href="jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><em>JobRegistry</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – instance to register the object. If “None”, the         object will be registered in the main <a class="reference internal" href="jobmgr.ContextManager.html#jobmgr.ContextManager" title="jobmgr.ContextManager"><code class="xref py py-class docutils literal"><span class="pre">ContextManager</span></code></a> instance.         Remember to close the <a class="reference internal" href="jobmgr.ContextManager.html#jobmgr.ContextManager" title="jobmgr.ContextManager"><code class="xref py py-class docutils literal"><span class="pre">ContextManager</span></code></a> class via         <a class="reference internal" href="jobmgr.ContextManager.html#jobmgr.ContextManager.close" title="jobmgr.ContextManager.close"><code class="xref py py-func docutils literal"><span class="pre">ContextManager.close()</span></code></a> or setting your execution withing a         context.</li>
 </ul>
 </td>
 </tr>
@@ -159,11 +159,8 @@ Using it on your own might cause undefined behaviour.</p>
 
 
 <h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="jobmgr.manager.html">manager</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobmgr.ContextManager.html">ContextManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jobmgr.JobRegistry.html">JobRegistry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jobmgr.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jobmgr.Watchdog.html">Watchdog</a></li>

@@ -48,7 +48,6 @@
 <span class="n">__email__</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
 <span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">atexit</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -59,7 +58,7 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">queue</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;JobManager&#39;</span><span class="p">,</span> <span class="s1">&#39;JobRegistry&#39;</span><span class="p">,</span> <span class="s1">&#39;manager&#39;</span><span class="p">,</span> <span class="s1">&#39;StatusCode&#39;</span><span class="p">,</span> <span class="s1">&#39;Watchdog&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ContextManager&#39;</span><span class="p">,</span> <span class="s1">&#39;JobRegistry&#39;</span><span class="p">,</span> <span class="s1">&#39;StatusCode&#39;</span><span class="p">,</span> <span class="s1">&#39;Watchdog&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="JobRegistry"><a class="viewcode-back" href="../../api/jobmgr.JobRegistry.html#jobmgr.JobRegistry">[docs]</a><span class="k">class</span> <span class="nc">JobRegistry</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
@@ -67,8 +66,10 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent a registry of jobs.</span>
-<span class="sd">        This object does not own the jobs, in the sense that it will not bring</span>
-<span class="sd">        kill signals on deletion.</span>
+<span class="sd">        This object owns the jobs, bringing kill signals on deletion.</span>
+<span class="sd">        It is responsability of the user to keep it alive.</span>
+<span class="sd">        Attached to this class there is a :class:`Watchdog`, which automatically</span>
+<span class="sd">        checks the status of the jobs.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">JobRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -109,6 +110,7 @@
 <div class="viewcode-block" id="JobRegistry.register"><a class="viewcode-back" href="../../api/jobmgr.JobRegistry.html#jobmgr.JobRegistry.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">job</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Register the given job, returning its new job ID.</span>
+<span class="sd">        This method is reserved for subclasses of :class:`JobBase`.</span>
 
 <span class="sd">        :param job: input job.</span>
 <span class="sd">        :type job: JobBase</span>
@@ -127,23 +129,39 @@
         <span class="k">return</span> <span class="n">jid</span></div></div>
 
 
-<div class="viewcode-block" id="JobManager"><a class="viewcode-back" href="../../api/jobmgr.JobManager.html#jobmgr.JobManager">[docs]</a><span class="k">class</span> <span class="nc">JobManager</span><span class="p">(</span><span class="n">JobRegistry</span><span class="p">):</span>
+<div class="viewcode-block" id="ContextManager"><a class="viewcode-back" href="../../api/jobmgr.ContextManager.html#jobmgr.ContextManager">[docs]</a><span class="k">class</span> <span class="nc">ContextManager</span><span class="p">(</span><span class="n">JobRegistry</span><span class="p">):</span>
 
     <span class="n">__instance</span>    <span class="o">=</span> <span class="kc">None</span>
     <span class="n">__initialized</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Singleton to hold and manage jobs.</span>
-<span class="sd">        If an attempt is made to create another object of this kind, the</span>
-<span class="sd">        same reference will be returned.</span>
+<span class="sd">        Singleton to represent a context to manage the jobs.</span>
+<span class="sd">        This object contains general jobs whose registries have not been</span>
+<span class="sd">        specified explicitely.</span>
+<span class="sd">        It can be used by two different ways:</span>
+
+<span class="sd">        - Context-like:</span>
+
+<span class="sd">        &gt;&gt;&gt; with ContextManager() as jobs:</span>
+<span class="sd">        ...     pass</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+
+<span class="sd">        - As a file:</span>
+
+<span class="sd">        &gt;&gt;&gt; jobs = ContextManager()</span>
+<span class="sd">        ... &#39;your code goes here...&#39;</span>
+<span class="sd">        &gt;&gt;&gt; jobs.close()</span>
+
+<span class="sd">        Calling :func:`ContextManager.close` is extremely necessary to prevent</span>
+<span class="sd">        a deadlock, since the monitoring thread would lock the session.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">JobManager</span><span class="o">.</span><span class="n">__initialized</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ContextManager</span><span class="o">.</span><span class="n">__initialized</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">JobManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ContextManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="n">JobManager</span><span class="o">.</span><span class="n">__initialized</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ContextManager</span><span class="o">.</span><span class="n">__initialized</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span> <span class="bp">cls</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -154,15 +172,20 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__initialized</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
 
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">JobManager</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ContextManager</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Delete the JobManager. Prevent from creating zombie jobs, waiting for</span>
-<span class="sd">        completion if they are running, or killing them if the user causes a</span>
-<span class="sd">        KeyboardInterrupt exception to be raised.</span>
+<span class="sd">        Initialize the context.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">excinfo</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for completion of the jobs.</span>
+<span class="sd">        If a KeyboardInterrupt is raised, it will kill the running jobs.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">j</span><span class="p">:</span> <span class="n">j</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatusCode</span><span class="o">.</span><span class="n">running</span><span class="p">,</span> <span class="bp">self</span><span class="p">)):</span>
 
@@ -175,18 +198,16 @@
             <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Killing running jobs&#39;</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">JobManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="manager"><a class="viewcode-back" href="../../api/jobmgr.manager.html#jobmgr.manager">[docs]</a><span class="k">def</span> <span class="nf">manager</span><span class="p">():</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Return the JobManager instance. This is equivalent to attempt to build \</span>
-<span class="sd">    a new instance of :class:`JobManager`.</span>
-
-<span class="sd">    :returns: the instance to manage jobs.</span>
-<span class="sd">    :rtype: JobManager</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">JobManager</span><span class="p">()</span></div>
+<div class="viewcode-block" id="ContextManager.close"><a class="viewcode-back" href="../../api/jobmgr.ContextManager.html#jobmgr.ContextManager.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Close the current context.</span>
+<span class="sd">        This must be called at the end of any process which creates the</span>
+<span class="sd">        instance of this class.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="StatusCode"><a class="viewcode-back" href="../../api/jobmgr.StatusCode.html#jobmgr.StatusCode">[docs]</a><span class="k">class</span> <span class="nc">StatusCode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -266,7 +287,6 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_watchdog</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Watchdog.stop"><a class="viewcode-back" href="../../api/jobmgr.Watchdog.html#jobmgr.Watchdog.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
@@ -305,10 +325,7 @@
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.manager.html">manager</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.ContextManager.html">ContextManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobRegistry.html">JobRegistry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.Watchdog.html">Watchdog</a></li>

@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="manager" href="api/jobmgr.manager.html" />
+    <link rel="next" title="ContextManager" href="api/jobmgr.ContextManager.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -58,25 +58,46 @@ pip install jobmgr
 </pre></div>
 </div>
 </div>
+<div class="section" id="the-api">
+<h1>The API<a class="headerlink" href="#the-api" title="Permalink to this headline">¶</a></h1>
+<p>This package provides an API based on <a class="reference external" href="https://ipython.org/">IPython</a>, which
+can be accessed via</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>job-mgr
+</pre></div>
+</div>
+<p>This will bring us to the standard <a class="reference external" href="https://ipython.org/">IPython</a> session,
+with the classes from this package being loaded on the main scope.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Welcome to &quot;jobmgr&quot; version 1.0.0</span>
+<span class="sd">Access the job manager via &quot;jobs&quot;</span>
+
+<span class="sd">Documentation is available at:</span>
+<span class="sd">https://mramospe.github.io/jobmgr/</span>
+
+<span class="sd">For issues, questions and contributions, please visit:</span>
+<span class="sd">https://github.com/mramospe/jobmgr</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+</pre></div>
+</div>
+<p>The main object you might want to interact with is the <code class="xref py py-class docutils literal"><span class="pre">ContextManager</span></code>
+class.
+This instance takes control of any job created in the execution whose registry
+has not been explicitly specified.
+It can be interpreted as a list of jobs.
+Let’s first see its length:</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="nb">len</span><span class="p">(</span><span class="n">jobs</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>This is because for the moment we don’t have registered jobs.</p>
+</div>
 <div class="section" id="functions-and-classes">
 <h1>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h1>
 <p>Here you can find the documentation on the functions and classes
 of the jobmgr package. The class inheritance diagram is also shown.</p>
-<span class="target" id="module-jobmgr"></span><div class="section" id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.manager.html#jobmgr.manager" title="jobmgr.manager"><code class="xref py py-obj docutils literal"><span class="pre">manager</span></code></a>()</td>
-<td>Return the JobManager instance.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="classes">
+<span class="target" id="module-jobmgr"></span><div class="section" id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -84,8 +105,8 @@ of the jobmgr package. The class inheritance diagram is also shown.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.JobManager.html#jobmgr.JobManager" title="jobmgr.JobManager"><code class="xref py py-obj docutils literal"><span class="pre">JobManager</span></code></a>()</td>
-<td>Singleton to hold and manage jobs.</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/jobmgr.ContextManager.html#jobmgr.ContextManager" title="jobmgr.ContextManager"><code class="xref py py-obj docutils literal"><span class="pre">ContextManager</span></code></a>()</td>
+<td>Singleton to represent a context to manage the jobs.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/jobmgr.JobRegistry.html#jobmgr.JobRegistry" title="jobmgr.JobRegistry"><code class="xref py py-obj docutils literal"><span class="pre">JobRegistry</span></code></a>()</td>
 <td>Represent a registry of jobs.</td>
@@ -113,8 +134,8 @@ of the jobmgr package. The class inheritance diagram is also shown.</p>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-06a319450050cadf9f6b006f18a345804ab2f6ba.png" alt="Inheritance diagram of jobmgr.core.JobManager, jobmgr.core.JobRegistry, jobmgr.core.StatusCode, jobmgr.core.Watchdog, jobmgr.jobs.JobBase, jobmgr.jobs.Job, jobmgr.jobs.Step, jobmgr.jobs.SteppedJob" usemap="#inheritancee88ddf90ec" class="inheritance"/>
-<map id="inheritancee88ddf90ec" name="inheritancee88ddf90ec">
+<img src="_images/inheritance-137e16c1dc369fd37a629316d6290af67e9a5015.png" alt="Inheritance diagram of jobmgr.core.ContextManager, jobmgr.core.JobRegistry, jobmgr.core.StatusCode, jobmgr.core.Watchdog, jobmgr.jobs.JobBase, jobmgr.jobs.Job, jobmgr.jobs.Step, jobmgr.jobs.SteppedJob" usemap="#inheritance690e763fbd" class="inheritance"/>
+<map id="inheritance690e763fbd" name="inheritance690e763fbd">
 <area shape="rect" id="node5" title="Hold the different possible status of jobs and steps." alt="" coords="5,55,103,80"/>
 </map>
 </div>
@@ -145,10 +166,7 @@ of the jobmgr package. The class inheritance diagram is also shown.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.manager.html">manager</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jobmgr.ContextManager.html">ContextManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/jobmgr.JobRegistry.html">JobRegistry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/jobmgr.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/jobmgr.Watchdog.html">Watchdog</a></li>
@@ -162,7 +180,7 @@ of the jobmgr package. The class inheritance diagram is also shown.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api/jobmgr.manager.html" title="next chapter">manager</a></li>
+      <li>Next: <a href="api/jobmgr.ContextManager.html" title="next chapter">ContextManager</a></li>
   </ul></li>
 </ul>
 </div>

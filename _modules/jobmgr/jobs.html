@@ -65,7 +65,7 @@
 
 <span class="c1"># Local</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">JobManager</span><span class="p">,</span> <span class="n">JobRegistry</span><span class="p">,</span> <span class="n">StatusCode</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">JobRegistry</span><span class="p">,</span> <span class="n">StatusCode</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;JobBase&#39;</span><span class="p">,</span> <span class="s1">&#39;Job&#39;</span><span class="p">,</span> <span class="s1">&#39;Step&#39;</span><span class="p">,</span> <span class="s1">&#39;SteppedJob&#39;</span><span class="p">]</span>
@@ -86,7 +86,10 @@
 <span class="sd">        :param path: path to the desired directory.</span>
 <span class="sd">        :type path: str</span>
 <span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
-<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        object will be registered in the main :class:`ContextManager` instance. \</span>
+<span class="sd">        Remember to close the :class:`ContextManager` class via \</span>
+<span class="sd">        :func:`ContextManager.close` or setting your execution withing a \</span>
+<span class="sd">        context.</span>
 <span class="sd">        :type registry: JobRegistry or None</span>
 
 <span class="sd">        :ivar jid: Job ID, determined by the subdirectories in the output path.</span>
@@ -106,7 +109,7 @@
 
         <span class="c1"># Register the object</span>
         <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">registry</span> <span class="o">=</span> <span class="n">JobManager</span><span class="p">()</span>
+            <span class="n">registry</span> <span class="o">=</span> <span class="n">ContextManager</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">jid</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -210,7 +213,10 @@
 <span class="sd">        default an event is constructed.</span>
 <span class="sd">        :type kill_event: threading.Event</span>
 <span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
-<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        object will be registered in the main :class:`ContextManager` instance. \</span>
+<span class="sd">        Remember to close the :class:`ContextManager` class via \</span>
+<span class="sd">        :func:`ContextManager.close` or setting your execution withing a \</span>
+<span class="sd">        context.</span>
 <span class="sd">        :type registry: JobRegistry or None</span>
 
 <span class="sd">        :ivar executable: Command to be executed.</span>
@@ -332,7 +338,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_terminated_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_task</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_execute</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Job.update_status"><a class="viewcode-back" href="../../api/jobmgr.Job.html#jobmgr.Job.update_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_status</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
@@ -508,7 +513,10 @@
 <span class="sd">        :param path: path to the desired directory.</span>
 <span class="sd">        :type path: str</span>
 <span class="sd">        :param registry: instance to register the object. If &quot;None&quot;, the \</span>
-<span class="sd">        object will be registered in the main :class:`JobManager` instance.</span>
+<span class="sd">        object will be registered in the main :class:`ContextManager` instance. \</span>
+<span class="sd">        Remember to close the :class:`ContextManager` class via \</span>
+<span class="sd">        :func:`ContextManager.close` or setting your execution withing a \</span>
+<span class="sd">        context.</span>
 <span class="sd">        :type registry: JobRegistry or None</span>
 
 <span class="sd">        :ivar steps: Steps managed by this job.</span>
@@ -625,10 +633,7 @@
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.manager.html">manager</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobManager.html">JobManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.ContextManager.html">ContextManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.JobRegistry.html">JobRegistry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.StatusCode.html">StatusCode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/jobmgr.Watchdog.html">Watchdog</a></li>

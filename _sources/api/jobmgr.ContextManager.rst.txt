@@ -1,0 +1,17 @@
+ContextManager
+==============
+
+.. currentmodule:: jobmgr
+
+.. autoclass:: ContextManager
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ContextManager.close
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: close
