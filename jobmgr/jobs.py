@@ -44,9 +44,10 @@ class JobBase(object):
         :param path: path to the desired directory.
         :type path: str
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`ContextManager` instance.
-        Remember to close the :class:`ContextManager` class via
-        :func:`ContextManager.close` or setting your execution withing a context.
+        object will be registered in the main :class:`ContextManager` instance. \
+        Remember to close the :class:`ContextManager` class via \
+        :func:`ContextManager.close` or setting your execution withing a \
+        context.
         :type registry: JobRegistry or None
 
         :ivar jid: Job ID, determined by the subdirectories in the output path.
@@ -170,9 +171,10 @@ class Job(JobBase):
         default an event is constructed.
         :type kill_event: threading.Event
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`ContextManager` instance.
-        Remember to close the :class:`ContextManager` class via
-        :func:`ContextManager.close` or setting your execution withing a context.
+        object will be registered in the main :class:`ContextManager` instance. \
+        Remember to close the :class:`ContextManager` class via \
+        :func:`ContextManager.close` or setting your execution withing a \
+        context.
         :type registry: JobRegistry or None
 
         :ivar executable: Command to be executed.
@@ -469,9 +471,10 @@ class SteppedJob(JobBase):
         :param path: path to the desired directory.
         :type path: str
         :param registry: instance to register the object. If "None", the \
-        object will be registered in the main :class:`ContextManager` instance.
-        Remember to close the :class:`ContextManager` class via
-        :func:`ContextManager.close` or setting your execution withing a context.
+        object will be registered in the main :class:`ContextManager` instance. \
+        Remember to close the :class:`ContextManager` class via \
+        :func:`ContextManager.close` or setting your execution withing a \
+        context.
         :type registry: JobRegistry or None
 
         :ivar steps: Steps managed by this job.

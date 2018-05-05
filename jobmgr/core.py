@@ -24,8 +24,10 @@ class JobRegistry(list):
     def __init__( self ):
         '''
         Represent a registry of jobs.
-        This object does not own the jobs, in the sense that it will not bring
-        kill signals on deletion.
+        This object owns the jobs, bringing kill signals on deletion.
+        It is responsability of the user to keep it alive.
+        Attached to this class there is a :class:`Watchdog`, which automatically
+        checks the status of the jobs.
         '''
         super(JobRegistry, self).__init__()
 
@@ -66,6 +68,7 @@ class JobRegistry(list):
     def register( self, job ):
         '''
         Register the given job, returning its new job ID.
+        This method is reserved for subclasses of :class:`JobBase`.
 
         :param job: input job.
         :type job: JobBase
@@ -158,7 +161,8 @@ class ContextManager(JobRegistry):
     def close( self ):
         '''
         Close the current context.
-        This must be called any time the instance of this class is created.
+        This must be called at the end of any process which creates the
+        instance of this class.
         '''
         self.watchdog.stop()
         self.__del__()
